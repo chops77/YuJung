@@ -1,12 +1,12 @@
-date: 2026-01-15
-time: "10:00"
+date: 2026-08-29
+time: 12:00
 venue:
-  en: "REPLACE — Funeral Home Chapel"
-  zh_tw: "REPLACE — 殯儀館禮堂"
-  zh_cn: "REPLACE — 殡仪馆礼堂"
+  en: Grace Chinese Lutheran Church
+  zh_tw: 西雅圖恩惠堂
+  zh_cn: 西雅图恩惠堂
 address:
-  en: ""
-  zh_tw: ""
-  zh_cn: ""
-mapsUrl: ""
+  en: 538 NE 127th St  Seattle, WA 98125
+  zh_tw: 538 NE 127th St  Seattle, WA 98125
+  zh_cn: 538 NE 127th St  Seattle, WA 98125
+mapsUrl: https://maps.app.goo.gl/DDnzLbKD9RSqvLiNA
 livestreamUrl: ""
