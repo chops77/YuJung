@@ -1,33 +1,8 @@
-import { el, relTime, youTubeEmbedUrl } from './dom';
+import { el, relTime } from './dom';
 import { subscribeMemories, fetchComments, addComment } from '../../lib/firebase';
+import { headRow, mediaNode, messageBlock } from './cards';
 
 const STR = JSON.parse(document.getElementById('wall-i18n').textContent);
-
-function mediaNode(item) {
-  if (item.type === 'video') {
-    const src = youTubeEmbedUrl(item.url);
-    if (!src) return null;
-    return el('div', { class: 'mt-3 overflow-hidden rounded-lg aspect-video' },
-      [el('iframe', { src, loading: 'lazy', title: 'video', allowfullscreen: '',
-        class: 'h-full w-full', allow: 'encrypted-media; picture-in-picture' })]);
-  }
-  const img = el('img', { src: item.url, alt: '', loading: 'lazy',
-    class: 'w-full cursor-zoom-in rounded-lg object-cover' });
-  img.addEventListener('click', () => showDialog(img.src));
-  return el('div', { class: 'mt-3' }, [img]);
-}
-
-function showDialog(src) {
-  let dlg = document.getElementById('lightbox');
-  if (!dlg) {
-    dlg = el('dialog', { id: 'lightbox', class: 'backdrop:bg-black/70 bg-transparent p-0' });
-    dlg.addEventListener('click', () => dlg.close());
-    document.body.append(dlg);
-  }
-  dlg.innerHTML = '';
-  dlg.append(el('img', { src, alt: '', class: 'max-h-[85vh] rounded-lg shadow-2xl' }));
-  dlg.showModal();
-}
 
 function commentRow(c) {
   const row = el('p', { class: 'text-sm leading-relaxed text-ink/80' });
@@ -38,16 +13,6 @@ function commentRow(c) {
     document.createTextNode(c.text),
   );
   return row;
-}
-
-async function loadComments(listEl) {
-  try {
-    const items = await fetchComments(card.id);
-    listEl.innerHTML = '';
-    if (!items.length) listEl.append(el('p', { class: 'text-sm text-ink/50', text: STR['comments.none'] }));
-    items.forEach(c => listEl.append(commentRow(c)));
-  } catch { /* transient */ }
-  var card; // hoisted reference set below (see usage)
 }
 
 function commentSection(card) {
@@ -64,7 +29,7 @@ function commentSection(card) {
   const input = el('input', { class: 'w-full rounded-md border hairline bg-white/60 px-3 py-2 text-sm outline-none focus:border-gold',
     placeholder: STR['comments.add'], maxlength: '1000' });
   const send = el('button', { type: 'button',
-    class: 'rounded-full bg-gold-deep px-4 py-1.5 text-sm text-white transition-colors hover:bg-ink disabled:opacity-50',
+    class: 'cursor-pointer rounded-full bg-gold-deep px-4 py-1.5 text-sm text-white transition-colors hover:bg-ink disabled:opacity-50',
     text: STR['comments.send'] });
 
   send.addEventListener('click', async () => {
@@ -89,7 +54,7 @@ function commentSection(card) {
   wrap.append(listEl, composeRow);
 
   const toggle = el('button', { type: 'button', 'aria-expanded': 'false',
-    class: 'mt-3 text-sm text-gold-deep underline underline-offset-4 hover:text-ink',
+    class: 'mt-3 cursor-pointer text-sm text-gold-deep underline underline-offset-4 hover:text-ink',
     text: STR['comments.show'] });
   toggle.addEventListener('click', async () => {
     const opening = wrap.classList.contains('hidden');
@@ -125,29 +90,9 @@ export function initWall(langTag) {
       return;
     }
     for (const card of cards) {
-      const long = card.message.length > 400;
-      const txt = el('span');
-      let expanded = false;
-      txt.textContent = long ? card.message.slice(0, 400) + '…' : card.message;
-
-      const msgP = el('p', { class: 'mt-2 whitespace-pre-line leading-relaxed text-ink/80' }, [txt]);
-      if (long) {
-        const more = el('button', { type: 'button',
-          class: 'ml-2 text-sm text-gold-deep underline underline-offset-4', text: '⋯' });
-        more.addEventListener('click', () => {
-          expanded = !expanded;
-          txt.textContent = expanded ? card.message : card.message.slice(0, 400) + '…';
-        });
-        msgP.append(more);
-      }
-
-      const head = el('header', { class: 'flex items-baseline justify-between gap-3' }, [
-        el('h3', { class: 'font-serif text-lg', text: card.authorName + (card.relation ? ' · ' + card.relation : '') }),
-        el('time', { class: 'shrink-0 text-xs text-ink/50', text: relTime(card.createdAt, langTag) }),
-      ]);
-
       const cardEl = el('article', { class: 'rounded-xl border hairline bg-white/50 p-5 shadow-sm' }, [
-        head, msgP,
+        headRow(card, langTag),
+        messageBlock(card.message, { expandable: true }),
         ...(card.media ?? []).map(mediaNode).filter(Boolean),
         commentSection(card),
       ]);
