@@ -77,8 +77,8 @@ collections:
               - { label: 'English',  name: en,    widget: string }
               - { label: '繁體中文',  name: zh_tw, widget: string }
               - { label: '简体中文',  name: zh_cn, widget: string }
-          - { label: 'Born (YYYY-MM-DD)',   name: born,   widget: date, format: 'YYYY-MM-DD' }
-          - { label: 'Passed (YYYY-MM-DD)', name: passed, widget: date, format: 'YYYY-MM-DD' }
+          - { label: 'Born (YYYY-MM-DD)',   name: born,   widget: datetime, format: 'YYYY-MM-DD', time_format: false, date_format: 'YYYY-MM-DD' }
+          - { label: 'Passed (YYYY-MM-DD)', name: passed, widget: datetime, format: 'YYYY-MM-DD', time_format: false, date_format: 'YYYY-MM-DD' }
           - { label: 'Portrait photo', name: portrait, widget: image,
               hint: 'Square photo recommended.' }
           - label: 'Epitaph (short quote under the hero)'
@@ -103,7 +103,7 @@ collections:
         file: 'src/content/service/service.yaml'
         format: yaml
         fields:
-          - { label: 'Date', name: date, widget: date, format: 'YYYY-MM-DD' }
+          - { label: 'Date', name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, date_format: 'YYYY-MM-DD' }
           - { label: 'Time (e.g. 10:00)', name: time, widget: string, required: false }
           - label: 'Venue name'
             name: venue
@@ -135,7 +135,7 @@ collections:
     summary: '{{adminTitle}} — {{date}}'
     fields:
       - { label: 'Admin Title (CMS label only)', name: adminTitle, widget: string }
-      - { label: 'Date', name: date, widget: date, format: 'YYYY-MM-DD' }
+      - { label: 'Date', name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, date_format: 'YYYY-MM-DD' }
       - label: 'Title'
         name: title
         widget: object
