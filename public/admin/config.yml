@@ -1,14 +1,14 @@
 # ─── Site ────────────────────────────────────────────────────────────────
-site_url: 'https://<user>.github.io/<repo>'
-display_url: 'https://<user>.github.io/<repo>'
+site_url: 'https://chops77.github.io/YuJung'
+display_url: 'https://chops77.github.io/YuJung'
 locale: 'en'
 
 # ─── Backend: GitHub, PKCE (no server, no secret) ───────────────────────
 backend:
   name: github
-  repo: '<user>/<repo>'
+  repo: 'chops77/YuJung'
   auth_type: pkce
-  app_id: '<GITHUB_OAUTH_APP_CLIENT_ID>'   # see README step B
+  app_id: 'Ov23licWcj4UJ6ORFhjR'   # see README step B
 
 # Local development only — uncomment, run `npx decap-server`,
 # open http://localhost:4321/admin/ , and RE-COMMENT before deploying!
