@@ -1,0 +1,19 @@
+---
+import { defaultLocale } from '../config';
+---
+<!doctype html>
+<html lang={defaultLocale}>
+  <head>
+    <meta charset="utf-8" />
+    {/* Client-side: honor saved choice; else default locale. */}
+    <script is:inline define:vars={{ defaultLocale, base: import.meta.env.BASE_URL }}>
+      const saved = localStorage.getItem('locale');
+      const target = ['en', 'zh-tw', 'zh-cn'].includes(saved) ? saved : defaultLocale;
+      location.replace(base + target + '/');
+    </script>
+    <noscript>
+      <meta http-equiv="refresh" content={`0; url=${import.meta.env.BASE_URL}${defaultLocale}/`} />
+    </noscript>
+  </head>
+  <body></body>
+</html>

@@ -1,0 +1,90 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import { getRelativeLocaleUrl } from 'astro:i18n';
+import { locales, type Locale } from '../../config';
+import { t, pick, formatDate } from '../../i18n/ui';
+import Base from '../../layouts/Base.astro';
+import Hero from '../../components/Hero.astro';
+
+export function getStaticParams() {
+  return locales.map((locale) => ({ params: { locale } }));
+}
+
+const locale = Astro.params.locale as Locale;
+const $t = t(locale);
+
+const settings = (await getEntry('settings', 'settings'))!.data;
+const profile = (await getEntry('profile', 'profile'))!.data;
+
+const timelineOn = settings.sections.timeline;
+const timelineItems = timelineOn
+  ? (await getCollection('timeline'))
+      .sort((a, b) => a.data.date.valueOf() - b.data.date.valueOf())
+      .slice(-3).reverse()
+  : [];
+
+const serviceOn = settings.sections.service;
+const service = serviceOn ? (await getEntry('service', 'service'))?.data : undefined;
+
+const bioText = pick(profile.biography, locale);
+const bioExcerpt = bioText.length > 320 ? bioText.slice(0, 320).trimEnd() + '…' : bioText;
+---
+<Base>
+  <Hero locale={locale} profile={profile} />
+
+  {bioExcerpt && settings.sections.lifeStory && (
+    <section class="border-t hairline py-12">
+      <h2 class="font-serif text-2xl">{$t('home.biographyTitle')}</h2>
+      <p class="mt-4 max-w-3xl leading-relaxed text-ink/80 whitespace-pre-line">{bioExcerpt}</p>
+      <a class="mt-4 inline-block text-gold-deep underline underline-offset-4 hover:text-ink"
+         href={getRelativeLocaleUrl(locale, 'life-story')}>
+        {$t('common.readMore')} →
+      </a>
+    </section>
+  )}
+
+  {timelineItems.length > 0 && (
+    <section class="border-t hairline py-12">
+      <h2 class="font-serif text-2xl">{$t('home.timelineTitle')}</h2>
+      <ol class="mt-6 grid gap-6 sm:grid-cols-3 list-none">
+        {timelineItems.map(({ data }) => (
+          <li class="rounded-lg border hairline bg-white/40 p-5">
+            <time class="text-sm font-medium text-gold-deep" datetime={data.date.toISOString().slice(0, 10)}>
+              {formatDate(data.date, locale)}
+            </time>
+            <h3 class="mt-1 font-serif text-lg">{pick(data.title, locale)}</h3>
+            <p class="mt-2 text-sm leading-relaxed text-ink/70 line-clamp-4">{pick(data.text, locale)}</p>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )}
+
+  {settings.sections.memories && (
+    <section class="border-t hairline py-12 text-center">
+      <h2 class="font-serif text-2xl">{$t('home.memoriesCta')}</h2>
+      <a class="mt-6 inline-block rounded-full bg-ink px-8 py-3 text-parchment transition-colors hover:bg-gold-deep"
+         href={getRelativeLocaleUrl(locale, 'memories')}>
+        {$t('home.enterMemories')}
+      </a>
+    </section>
+  )}
+
+  {service && (
+    <section class="border-t hairline py-12">
+      <h2 class="font-serif text-2xl">{$t('home.serviceCard')}</h2>
+      <div class="mt-4 rounded-lg border hairline bg-white/40 p-6">
+        <p class="text-ink/80">
+          {service.date.toLocaleDateString({ en: 'en-US', 'zh-tw': 'zh-TW', 'zh-cn': 'zh-CN' }[locale], { dateStyle: 'long' })}
+          {service.time && ` · ${service.time}`}
+        </p>
+        <p class="mt-1 text-ink/70">{pick(service.venue, locale)}</p>
+        {service.mapsUrl && (
+          <a class="mt-3 inline-block text-gold-deep underline underline-offset-4" href={service.mapsUrl} target="_blank" rel="noopener">
+            {$t('service.where')} →
+          </a>
+        )}
+      </div>
+    </section>
+  )}
+</Base>

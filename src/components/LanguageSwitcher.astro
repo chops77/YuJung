@@ -1,0 +1,31 @@
+---
+import { getRelativeLocaleUrl } from 'astro:i18n';
+import { locales, localeNames, type Locale } from '../config';
+
+interface Props { locale: Locale; currentSlug: string; }
+const { locale, currentSlug } = Astro.props;
+
+const links = locales.map((l) => ({
+  l,
+  href: getRelativeLocaleUrl(l, currentSlug),
+  active: l === locale,
+}));
+---
+<nav aria-label="Language / 語言 / 语言" class="flex items-center gap-1 text-sm">
+  {links.map(({ l, href, active }) =>
+    active ? (
+      <span aria-current="true" class="px-2 py-1 rounded font-medium text-ink underline decoration-gold underline-offset-4">
+        {localeNames[l]}
+      </span>
+    ) : (
+      <a href={href} data-lang={l} class="px-2 py-1 rounded text-ink/60 hover:text-ink hover:bg-black/5 transition-colors">
+        {localeNames[l]}
+      </a>
+    )
+  )}
+</nav>
+<script is:inline>
+  document.querySelectorAll<HTMLAnchorElement>('a[data-lang]').forEach((a) =>
+    a.addEventListener('click', () => localStorage.setItem('locale', a.dataset.lang!))
+  );
+</script>

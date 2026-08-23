@@ -1,0 +1,227 @@
+# ─── Site ────────────────────────────────────────────────────────────────
+site_url: 'https://<user>.github.io/<repo>'
+display_url: 'https://<user>.github.io/<repo>'
+locale: 'en'
+
+# ─── Backend: GitHub, PKCE (no server, no secret) ───────────────────────
+backend:
+  name: github
+  repo: '<user>/<repo>'
+  auth_type: pkce
+  app_id: '<GITHUB_OAUTH_APP_CLIENT_ID>'   # see README step B
+
+# Local development only — uncomment, run `npx decap-server`,
+# open http://localhost:4321/admin/ , and RE-COMMENT before deploying!
+# local_backend: true
+
+# ─── Media ───────────────────────────────────────────────────────────────
+# Uploaded files land in public/media/uploads/. Inserted values have NO
+# leading slash on purpose — components prefix BASE_URL at render time.
+media_folder: 'public/media/uploads'
+public_folder: 'media/uploads'
+
+collections:
+  # ============ Single-file pages & settings ============
+  - name: 'pages'
+    label: 'Pages & Settings'
+    files:
+
+      # ---------- SITE SETTINGS ----------
+      - name: settings
+        label: '⚙️ Site Settings'
+        file: 'src/content/settings/settings.yaml'
+        format: yaml
+        fields:
+          - label: 'Site Title'
+            name: siteTitle
+            widget: object
+            fields:
+              - { label: 'English',  name: en,    widget: string }
+              - { label: '繁體中文',  name: zh_tw, widget: string }
+              - { label: '简体中文',  name: zh_cn, widget: string }
+          - label: 'Visible Sections'
+            name: sections
+            widget: object
+            hint: 'Untick a section to remove it from navigation and hide its page.'
+            fields:
+              - { label: 'Life Story',  name: lifeStory, widget: boolean, default: true }
+              - { label: 'Timeline',    name: timeline,  widget: boolean, default: true }
+              - { label: 'Gallery',     name: gallery,   widget: boolean, default: true }
+              - { label: 'Memory Wall', name: memories,  widget: boolean, default: true }
+              - { label: 'Service Details — switch off after services conclude',
+                  name: service, widget: boolean, default: true }
+              - { label: 'Donations',   name: donations, widget: boolean, default: false }
+          - { label: 'Contact Email', name: contactEmail, widget: string, required: false }
+          - label: 'Footer Note'
+            name: footerNote
+            widget: object
+            required: false
+            fields:
+              - { label: 'English',  name: en,    widget: string, required: false }
+              - { label: '繁體中文',  name: zh_tw, widget: string, required: false }
+              - { label: '简体中文',  name: zh_cn, widget: string, required: false }
+
+      # ---------- MEMORIAL PROFILE ----------
+      - name: profile
+        label: '👤 Memorial Profile'
+        file: 'src/content/profile/profile.yaml'
+        format: yaml
+        fields:
+          - label: 'Name'
+            name: name
+            widget: object
+            fields:
+              - { label: 'English',  name: en,    widget: string }
+              - { label: '繁體中文',  name: zh_tw, widget: string }
+              - { label: '简体中文',  name: zh_cn, widget: string }
+          - { label: 'Born (YYYY-MM-DD)',   name: born,   widget: date, format: 'YYYY-MM-DD' }
+          - { label: 'Passed (YYYY-MM-DD)', name: passed, widget: date, format: 'YYYY-MM-DD' }
+          - { label: 'Portrait photo', name: portrait, widget: image,
+              hint: 'Square photo recommended.' }
+          - label: 'Epitaph (short quote under the hero)'
+            name: epitaph
+            widget: object
+            required: false
+            fields:
+              - { label: 'English',  name: en,    widget: string, required: false }
+              - { label: '繁體中文',  name: zh_tw, widget: string, required: false }
+              - { label: '简体中文',  name: zh_cn, widget: string, required: false }
+          - label: 'Biography (Life Story)'
+            name: biography
+            widget: object
+            fields:
+              - { label: 'English',  name: en,    widget: text }
+              - { label: '繁體中文',  name: zh_tw, widget: text }
+              - { label: '简体中文',  name: zh_cn, widget: text }
+
+      # ---------- SERVICE DETAILS ----------
+      - name: service
+        label: '🕯 Service Details'
+        file: 'src/content/service/service.yaml'
+        format: yaml
+        fields:
+          - { label: 'Date', name: date, widget: date, format: 'YYYY-MM-DD' }
+          - { label: 'Time (e.g. 10:00)', name: time, widget: string, required: false }
+          - label: 'Venue name'
+            name: venue
+            widget: object
+            fields:
+              - { label: 'English',  name: en,    widget: string, required: false }
+              - { label: '繁體中文',  name: zh_tw, widget: string, required: false }
+              - { label: '简体中文',  name: zh_cn, widget: string, required: false }
+          - label: 'Address'
+            name: address
+            widget: object
+            required: false
+            fields:
+              - { label: 'English',  name: en,    widget: string, required: false }
+              - { label: '繁體中文',  name: zh_tw, widget: string, required: false }
+              - { label: '简体中文',  name: zh_cn, widget: string, required: false }
+          - { label: 'Google Maps URL', name: mapsUrl, widget: string, required: false }
+          - { label: 'Livestream URL',  name: livestreamUrl, widget: string, required: false }
+
+  # ============ Repeatable entries ============
+  # adminTitle exists only as a readable CMS label; Astro strips it at build.
+  - name: timeline
+    label: '📜 Timeline'
+    folder: 'src/content/timeline'
+    format: yaml
+    extension: yaml
+    create: true
+    identifier_field: adminTitle
+    summary: '{{adminTitle}} — {{date}}'
+    fields:
+      - { label: 'Admin Title (CMS label only)', name: adminTitle, widget: string }
+      - { label: 'Date', name: date, widget: date, format: 'YYYY-MM-DD' }
+      - label: 'Title'
+        name: title
+        widget: object
+        fields:
+          - { label: 'English',  name: en,    widget: string }
+          - { label: '繁體中文',  name: zh_tw, widget: string }
+          - { label: '简体中文',  name: zh_cn, widget: string }
+      - label: 'Text'
+        name: text
+        widget: object
+        fields:
+          - { label: 'English',  name: en,    widget: text }
+          - { label: '繁體中文',  name: zh_tw, widget: text }
+          - { label: '简体中文',  name: zh_cn, widget: text }
+      - { label: 'Photo (optional)', name: image, widget: image, required: false }
+      - { label: 'Sort order (smaller = earlier)', name: order, widget: number,
+          default: 0, value_type: 'int', min: 0 }
+
+  - name: photos
+    label: '🖼 Photos'
+    folder: 'src/content/photos'
+    format: yaml
+    extension: yaml
+    create: true
+    identifier_field: adminTitle
+    summary: '{{adminTitle}}'
+    fields:
+      - { label: 'Admin Title (CMS label only)', name: adminTitle, widget: string }
+      - { label: 'Photo', name: image, widget: image }
+      - label: 'Caption'
+        name: caption
+        widget: object
+        required: false
+        fields:
+          - { label: 'English',  name: en,    widget: string, required: false }
+          - { label: '繁體中文',  name: zh_tw, widget: string, required: false }
+          - { label: '简体中文',  name: zh_cn, widget: string, required: false }
+      - label: 'Alt text (screen readers — important!)'
+        name: alt
+        widget: object
+        required: false
+        fields:
+          - { label: 'English',  name: en,    widget: string, required: false }
+          - { label: '繁體中文',  name: zh_tw, widget: string, required: false }
+          - { label: '简体中文',  name: zh_cn, widget: string, required: false }
+      - { label: 'Sort order', name: order, widget: number, default: 0, value_type: 'int', min: 0 }
+
+  - name: videos
+    label: '🎬 Videos'
+    folder: 'src/content/videos'
+    format: yaml
+    extension: yaml
+    create: true
+    identifier_field: adminTitle
+    summary: '{{adminTitle}}'
+    fields:
+      - { label: 'Admin Title (CMS label only)', name: adminTitle, widget: string }
+      - label: 'YouTube video ID'
+        name: youtubeId
+        widget: string
+        hint: 'The part after watch?v= — e.g. dQw4w9WgXcQ. Upload as Unlisted.'
+      - label: 'Title'
+        name: title
+        widget: object
+        required: false
+        fields:
+          - { label: 'English',  name: en,    widget: string, required: false }
+          - { label: '繁體中文',  name: zh_tw, widget: string, required: false }
+          - { label: '简体中文',  name: zh_cn, widget: string, required: false }
+      - { label: 'Sort order', name: order, widget: number, default: 0, value_type: 'int', min: 0 }
+
+  - name: donations
+    label: '💐 Donations'
+    folder: 'src/content/donations'
+    format: yaml
+    extension: yaml
+    create: true
+    identifier_field: adminTitle
+    summary: '{{adminTitle}}'
+    fields:
+      - { label: 'Admin Title (CMS label only)', name: adminTitle, widget: string }
+      - { label: 'Charity name', name: name, widget: string }
+      - { label: 'Donation URL', name: url, widget: string }
+      - label: 'Blurb'
+        name: blurb
+        widget: object
+        required: false
+        fields:
+          - { label: 'English',  name: en,    widget: text, required: false }
+          - { label: '繁體中文',  name: zh_tw, widget: text, required: false }
+          - { label: '简体中文',  name: zh_cn, widget: text, required: false }
+      - { label: 'Sort order', name: order, widget: number, default: 0, value_type: 'int', min: 0 }

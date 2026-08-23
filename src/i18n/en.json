@@ -1,0 +1,61 @@
+{
+  "nav.home": "Home",
+  "nav.lifeStory": "Life Story",
+  "nav.timeline": "Timeline",
+  "nav.gallery": "Gallery",
+  "nav.memories": "Memories",
+  "nav.service": "Service Details",
+  "nav.donations": "Donations",
+
+  "hero.inLovingMemory": "In Loving Memory",
+  "meta.description": "A place to remember, share memories, and celebrate a life.",
+
+  "home.biographyTitle": "Life Story",
+  "home.timelineTitle": "Milestones",
+  "home.memoriesCta": "Memories shared by family and friends",
+  "home.enterMemories": "Visit the Memory Wall",
+  "home.serviceCard": "Service Details",
+
+  "cta.shareMemory": "Share a Memory",
+
+  "common.menu": "Menu",
+  "common.readMore": "Read more",
+  "common.loading": "Loading…",
+  "common.backHome": "Back to Home",
+  "common.skipToContent": "Skip to content",
+
+  "form.name": "Your name",
+  "form.relationOptional": "Relationship (optional)",
+  "form.message": "Your message",
+  "form.submit": "Submit",
+  "form.photo": "Attach a photo (optional)",
+  "form.photoHint": "JPEG/PNG/WebP · resized automatically",
+  "form.videoUrl": "Video link (optional)",
+  "form.videoHint": "Paste a YouTube link",
+  "form.success": "Thank you — your memory has been shared.",
+  "form.cooldown": "Please wait a moment before posting again.",
+  "form.invalidVideo": "That doesn't look like a YouTube link.",
+
+  "errors.generic": "Something went wrong. Please try again.",
+
+  "wall.count": "{count} memories shared",
+  "wall.empty": "No memories yet — be the first to share one.",
+
+  "comments.show": "Comments",
+  "comments.add": "Write a comment…",
+  "comments.send": "Post",
+  "comments.none": "No comments yet.",
+
+  "candle.light": "Light a Candle",
+  "candle.lit": "{count} candles lit",
+
+  "gallery.photos": "Photos",
+  "gallery.videos": "Videos",
+
+  "service.when": "Date & Time",
+  "service.where": "Location",
+  "service.livestream": "Watch the livestream",
+
+  "donations.intro": "Should you wish to honour her memory, the family warmly suggests a donation to one of these organisations.",
+  "donations.cta": "Donate"
+}

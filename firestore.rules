@@ -1,0 +1,45 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+
+    function isAdmin() {
+      return request.auth != null &&
+        exists(/databases/$(db)/documents/admins/$(request.auth.uid));
+    }
+
+    match /memories/{card} {
+      allow read: if resource.data.hidden != true;
+      allow create: if request.auth != null
+        && request.resource.data.authorName is string
+        && request.resource.data.authorName.size() > 0
+        && request.resource.data.authorName.size() <= 60
+        && request.resource.data.message is string
+        && request.resource.data.message.size() >= 1
+        && request.resource.data.message.size() <= 2000
+        && request.resource.data.hidden == false
+        && request.resource.data.createdAt == request.time;
+      allow update, delete: if isAdmin();
+
+      match /comments/{comment} {
+        allow read: if resource.data.hidden != true;
+        allow create: if request.auth != null
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 1000
+          && request.resource.data.hidden == false
+          && request.resource.data.createdAt == request.time;
+        allow update, delete: if isAdmin();
+      }
+    }
+
+    match /candles/{id} {
+      allow read: if true;
+      allow create: if request.auth != null;
+    }
+
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+  }
+}

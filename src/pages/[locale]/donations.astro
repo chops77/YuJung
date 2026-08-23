@@ -1,0 +1,36 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import { locales, type Locale } from '../../config';
+import { t, pick } from '../../i18n/ui';
+import Base from '../../layouts/Base.astro';
+
+export function getStaticParams() {
+  return locales.map((locale) => ({ params: { locale } }));
+}
+
+const locale = Astro.params.locale as Locale;
+const settings = (await getEntry('settings', 'settings'))!.data;
+if (!settings.sections.donations) return Astro.redirect(`/${locale}/`);
+
+const $t = t(locale);
+const items = (await getCollection('donations')).sort((a, b) => a.data.order - b.data.order);
+---
+<Base title={$t('nav.donations')}>
+  <section class="py-10">
+    <h1 class="text-center font-serif text-4xl">{$t('nav.donations')}</h1>
+    <p class="mx-auto mt-4 max-w-xl text-center leading-relaxed text-ink/70">{$t('donations.intro')}</p>
+
+    <div class="mx-auto mt-10 grid max-w-3xl gap-5 sm:grid-cols-2">
+      {items.map(({ data }) => (
+        <article class="flex flex-col rounded-xl border hairline bg-white/50 p-6 shadow-sm">
+          <h2 class="font-serif text-xl">{data.name}</h2>
+          <p class="mt-2 flex-1 text-sm leading-relaxed text-ink/70">{pick(data.blurb, locale)}</p>
+          <a href={data.url} target="_blank" rel="noopener noreferrer"
+             class="mt-5 self-start rounded-full bg-ink px-6 py-2 text-sm text-parchment transition-colors hover:bg-gold-deep">
+            {$t('donations.cta')} ↗
+          </a>
+        </article>
+      ))}
+    </div>
+  </section>
+</Base>

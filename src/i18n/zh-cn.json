@@ -1,0 +1,61 @@
+{
+  "nav.home": "首页",
+  "nav.lifeStory": "生平故事",
+  "nav.timeline": "生平大事记",
+  "nav.gallery": "照片视频",
+  "nav.memories": "追思回忆",
+  "nav.service": "追悼会信息",
+  "nav.donations": "捐赠致意",
+
+  "hero.inLovingMemory": "永远怀念",
+  "meta.description": "一个怀念、分享回忆、缅怀一生的角落。",
+
+  "home.biographyTitle": "生平故事",
+  "home.timelineTitle": "生平大事记",
+  "home.memoriesCta": "亲友的追思与回忆",
+  "home.enterMemories": "前往追思墙",
+  "home.serviceCard": "追悼会信息",
+
+  "cta.shareMemory": "分享回忆",
+
+  "common.menu": "菜单",
+  "common.readMore": "阅读更多",
+  "common.loading": "加载中…",
+  "common.backHome": "返回首页",
+  "common.skipToContent": "跳至主要内容",
+
+  "form.name": "您的姓名",
+  "form.relationOptional": "与逝者的关系（选填）",
+  "form.message": "想说的话",
+  "form.submit": "提交",
+  "form.photo": "上传照片（选填）",
+  "form.photoHint": "JPEG/PNG/WebP · 自动压缩",
+  "form.videoUrl": "视频链接（选填）",
+  "form.videoHint": "粘贴 YouTube 链接",
+  "form.success": "谢谢您——您的回忆已经分享了。",
+  "form.cooldown": "请稍候片刻再提交。",
+  "form.invalidVideo": "这不是有效的 YouTube 链接。",
+
+  "errors.generic": "出错了，请重试。",
+
+  "wall.count": "已分享 {count} 条回忆",
+  "wall.empty": "还没有任何回忆，欢迎成为第一位分享者。",
+
+  "comments.show": "留言",
+  "comments.add": "写下您的评论…",
+  "comments.send": "发表",
+  "comments.none": "暂无评论。",
+
+  "candle.light": "点烛致敬",
+  "candle.lit": "已点亮 {count} 支蜡烛",
+
+  "gallery.photos": "照片",
+  "gallery.videos": "视频",
+
+  "service.when": "日期时间",
+  "service.where": "地点",
+  "service.livestream": "观看直播",
+
+  "donations.intro": "若您想向逝者致意，家属诚挚建议将心意化为捐款，支持以下机构。",
+  "donations.cta": "捐赠"
+}

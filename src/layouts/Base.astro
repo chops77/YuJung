@@ -1,0 +1,146 @@
+---
+import '../styles/global.css';
+import { getEntry } from 'astro:content';
+import { getRelativeLocaleUrl, getAbsoluteLocaleUrl } from 'astro:i18n';
+import { locales, defaultLocale, langTags, localeNames, type Locale } from '../config';
+import { t, pick } from '../i18n/ui';
+import LanguageSwitcher from '../components/LanguageSwitcher.astro';
+
+interface Props { title?: string; description?: string; ogImage?: string; }
+const { title, description, ogImage } = Astro.props;
+
+const locale = Astro.currentLocale as Locale;
+const $t = t(locale);
+const base = import.meta.env.BASE_URL; // e.g. "/repo/"
+
+const settings = (await getEntry('settings', 'settings'))!.data;
+const profile = (await getEntry('profile', 'profile'))!.data;
+
+/* ---- navigation generated from section toggles ---- */
+const NAV = [
+  { slug: '',           key: 'nav.home',      on: true },
+  { slug: 'life-story', key: 'nav.lifeStory', on: settings.sections.lifeStory },
+  { slug: 'timeline',   key: 'nav.timeline',  on: settings.sections.timeline },
+  { slug: 'gallery',    key: 'nav.gallery',   on: settings.sections.gallery },
+  { slug: 'memories',   key: 'nav.memories',  on: settings.sections.memories },
+  { slug: 'service',    key: 'nav.service',   on: settings.sections.service },
+  { slug: 'donations',  key: 'nav.donations', on: settings.sections.donations },
+].filter((n) => n.on);
+
+const homeUrl = getRelativeLocaleUrl(locale, '');
+
+/* ---- current slug (for hreflang + switcher): strips base and locale ---- */
+const slug = Astro.url.pathname
+  .replace(base, '')
+  .replace(new RegExp(`^${locale}/?`), '')
+  .replace(/\/$/, '');
+
+/* ---- titles, meta ---- */
+const siteTitle = pick(settings.siteTitle, locale);
+const pageTitle = title ? `${title} · ${siteTitle}` : siteTitle;
+const desc = description || $t('meta.description');
+const ogImg = ogImage ?? `${import.meta.env.SITE}${base}media/og.jpg`;
+const alternates = locales.map((l) => ({
+  l,
+  name: localeNames[l],
+  abs: getAbsoluteLocaleUrl(l, slug),
+}));
+---
+
+<!doctype html>
+<html lang={langTags[locale]} class="min-h-screen">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={desc} />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    {alternates.map(({ l, abs }) => (
+      <link rel="alternate" hreflang={langTags[l]} href={abs} />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={getAbsoluteLocaleUrl(defaultLocale, slug)} />
+
+    <!-- Open Graph / LINE / WhatsApp share preview -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={desc} />
+    <meta property="og:image" content={ogImg} />
+    <meta property="og:url" content={new URL(Astro.url.pathname, Astro.site)} />
+    <meta property="og:locale" content={langTags[locale].replace('-', '_')} />
+    {alternates.filter(a => a.l !== locale).map(({ l }) => (
+      <meta property="og:locale:alternate" content={langTags[l].replace('-', '_')} />
+    ))}
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
+    <meta name="theme-color" content="#f7f3ec" />
+
+    <!-- Fonts: swap-heavy subsets; zh fonts fall back gracefully while loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Noto+Serif+TC:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=Source+Sans+3:wght@400;600&family=Noto+Sans+TC:wght@400;500&family=Noto+Sans+SC:wght@400;500&display=swap"
+    />
+  </head>
+
+  <body class="bg-parchment text-ink font-body antialiased min-h-screen flex flex-col selection:bg-gold/25">
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-ink focus:text-parchment focus:px-3 focus:py-2">
+      {$t('common.skipToContent')}
+    </a>
+
+    <header class="sticky top-0 z-30 border-b hairline bg-parchment/90 backdrop-blur">
+      <div class="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4">
+        <a href={homeUrl} class="shrink-0 font-serif text-lg tracking-wide">{siteTitle}</a>
+
+        <nav aria-label={$t('common.menu')} class="hidden md:block">
+          <ul class="flex items-center gap-5 text-[15px]">
+            {NAV.map(({ slug: s, key }) => (
+              <li>
+                <a
+                  href={getRelativeLocaleUrl(locale, s)}
+                  aria-current={slug === s && s !== '' ? 'page' : undefined}
+                  class:list={[
+                    'transition-colors hover:text-ink',
+                    slug === s && s !== '' ? 'text-ink underline decoration-gold underline-offset-8' : 'text-ink/70',
+                  ]}
+                >
+                  {$t(key)}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <div class="flex items-center gap-3">
+          <LanguageSwitcher locale={locale} currentSlug={slug} />
+          <details class="relative md:hidden">
+            <summary class="cursor-pointer list-none rounded p-2 hover:bg-black/5" aria-label={$t('common.menu')}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+            </summary>
+            <ul class="absolute right-0 mt-2 w-48 rounded-lg border hairline bg-parchment p-2 shadow-lg">
+              {NAV.map(({ slug: s, key }) => (
+                <li>
+                  <a class="block rounded px-3 py-2 hover:bg-black/5" href={getRelativeLocaleUrl(locale, s)}>{$t(key)}</a>
+                </li>
+              ))}
+            </ul>
+          </details>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="mx-auto w-full max-w-5xl flex-1 px-4 py-10">
+      <slot />
+    </main>
+
+    <footer class="border-t hairline">
+      <div class="mx-auto max-w-5xl space-y-2 px-4 py-8 text-center text-sm text-ink/60">
+        <p class="font-serif text-base text-ink/80">
+          {pick(profile.name, locale)} · {profile.born.getFullYear()}–{profile.passed.getFullYear()}
+        </p>
+        {settings.footerNote && <p>{pick(settings.footerNote, locale)}</p>}
+      </div>
+    </footer>
+  </body>
+</html>

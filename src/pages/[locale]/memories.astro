@@ -1,0 +1,73 @@
+---
+import { getEntry } from 'astro:content';
+import { locales, intlLocale, type Locale } from '../../config';
+import { t } from '../../i18n/ui';
+import Base from '../../layouts/Base.astro';
+
+export function getStaticParams() {
+  return locales.map((locale) => ({ params: { locale } }));
+}
+
+const locale = Astro.params.locale as Locale;
+const settings = (await getEntry('settings', 'settings'))!.data;
+if (!settings.sections.memories) return Astro.redirect(`/${locale}/`);
+
+const $t = t(locale);
+// Strings handed to the client-side islands:
+const wallStrings = JSON.stringify({
+  langTag: intlLocale(locale),
+  'wall.count': $t('wall.count'), 'wall.empty': $t('wall.empty'),
+  'form.name': $t('form.name'), 'form.submit': $t('form.submit'),
+  'form.relationOptional': $t('form.relationOptional'), 'form.message': $t('form.message'),
+  'form.photo': $t('form.photo'), 'form.photoHint': $t('form.photoHint'),
+  'form.videoUrl': $t('form.videoUrl'), 'form.videoHint': $t('form.videoHint'),
+  'form.success': $t('form.success'), 'form.cooldown': $t('form.cooldown'),
+  'form.invalidVideo': $t('form.invalidVideo'), 'errors.generic': $t('errors.generic'),
+  'comments.show': $t('comments.show'), 'comments.add': $t('comments.add'),
+  'comments.send': $t('comments.send'), 'comments.none': $t('comments.none'),
+  'candle.light': $t('candle.light'), 'candle.lit': $t('candle.lit'),
+});
+---
+<Base title={$t('nav.memories')}>
+  <script type="application/json" id="wall-i18n" set:html={wallStrings} />
+
+  <section class="py-8 text-center">
+    <h1 class="font-serif text-4xl">{$t('nav.memories')}</h1>
+    <div id="candle-widget" class="mt-10 flex flex-col items-center gap-3">
+      <button class="candle-btn group relative flex h-20 w-20 items-center justify-center rounded-full border hairline bg-white/50 transition-transform hover:scale-105 active:scale-95"
+              aria-label={$t('candle.light')}>
+        <span class="glow absolute inset-0 rounded-full bg-gold/0 transition-colors duration-700"></span>
+        <svg width="44" height="58" viewBox="0 0 32 42" fill="none" aria-hidden="true"
+             class="relative drop-shadow-[0_0_10px_rgba(240,165,80,.55)]">
+          <path class="flame" d="M16 2c3.4 3.8 5.5 6.4 5.5 9a5.5 5.5 0 1 1-11 0C10.5 8.4 12.6 5.8 16 2z" fill="#eda54e"/>
+          <path class="flame-inner" d="M16 7c1.7 1.9 2.7 3.2 2.7 4.5a2.7 2.7 0 1 1-5.4 0C13.3 10.2 14.3 8.9 16 7z" fill="#fbe29a"/>
+          <rect x="11" y="19" width="10" height="21" rx="3" fill="#efe4cf"/>
+          <rect x="11" y="19" width="10" height="4" rx="2" fill="#dccbb0"/>
+          <line x1="16" y1="17" x2="16" y2="20" stroke="#6b5a44" stroke-width="1.6"/>
+        </svg>
+      </button>
+      <p class="text-sm text-ink/60"><span data-count>…</span></p>
+    </div>
+  </section>
+
+  <section class="border-t hairline py-10">
+    <h2 class="mb-6 text-center font-serif text-2xl">{$t('cta.shareMemory')}</h2>
+    <div id="memory-form"></div>
+    <p id="form-status" class="mt-3 min-h-[1.5rem] text-center text-sm text-sage" aria-live="polite"></p>
+  </section>
+
+  <section class="border-t hairline py-10">
+    <p id="memory-count" class="mb-6 text-center text-sm text-ink/50"></p>
+    <div id="memory-wall" class="grid gap-5 md:grid-cols-2"></div>
+  </section>
+
+  <script>
+    import { initForm } from '../../components/MemoryWall/form';
+    import { initWall } from '../../components/MemoryWall/wall';
+    const strings = JSON.parse(document.getElementById('wall-i18n')!.textContent!);
+    initForm();
+    initWall(strings.langTag);
+    import('../../components/MemoryWall/candle').then(m =>
+      m.initCandle(strings['candle.light'], strings['candle.lit']));
+  </script>
+</Base>

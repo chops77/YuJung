@@ -1,0 +1,96 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import { locales, type Locale } from '../../config';
+import { t, pick } from '../../i18n/ui';
+import Base from '../../layouts/Base.astro';
+
+export function getStaticParams() {
+  return locales.map((locale) => ({ params: { locale } }));
+}
+
+const locale = Astro.params.locale as Locale;
+const settings = (await getEntry('settings', 'settings'))!.data;
+if (!settings.sections.gallery) return Astro.redirect(`/${locale}/`);
+
+const $t = t(locale);
+const photos = (await getCollection('photos')).sort((a, b) => a.data.order - b.data.order);
+const videos = (await getCollection('videos')).sort((a, b) => a.data.order - b.data.order);
+---
+<Base title={$t('nav.gallery')}>
+  <section class="py-10">
+    <h2 class="text-center font-serif text-3xl">{$t('gallery.photos')}</h2>
+    <div class="mt-8 columns-2 gap-4 md:columns-3 [&>*]:mb-4 break-inside-avoid">
+      {photos.map(({ data }) => (
+        <figure class="break-inside-avoid">
+          <img data-lightbox
+               src={`${import.meta.env.BASE_URL}${data.image}`}
+               alt={pick(data.alt, locale)}
+               loading="lazy"
+               class="w-full cursor-zoom-in rounded-lg shadow-sm ring-1 ring-black/10 transition hover:opacity-90" />
+          {pick(data.caption, locale) && (
+            <figcaption class="mt-1.5 text-center text-xs text-ink/60">{pick(data.caption, locale)}</figcaption>
+          )}
+        </figure>
+      ))}
+    </div>
+  </section>
+
+  {videos.length > 0 && (
+    <section class="border-t hairline py-10">
+      <h2 class="text-center font-serif text-3xl">{$t('gallery.videos')}</h2>
+      <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {videos.map(({ data }) => (
+          <button
+            class="video-facade group relative aspect-video overflow-hidden rounded-xl bg-black shadow-sm ring-1 ring-black/10"
+            data-video-id={data.youtubeId}
+            aria-label={pick(data.title, locale) || $t('gallery.videos')}
+          >
+            <img src={`https://i.ytimg.com/vi/${data.youtubeId}/hqdefault.jpg`}
+                 alt="" loading="lazy"
+                 class="h-full w-full object-cover opacity-90 transition group-hover:scale-105 group-hover:opacity-100" />
+            <span class="absolute inset-0 flex items-center justify-center">
+              <span class="flex h-14 w-14 items-center justify-center rounded-full bg-black/70 text-lg text-white transition group-hover:scale-110 group-hover:bg-gold-deep" aria-hidden="true">▶</span>
+            </span>
+            {pick(data.title, locale) && (
+              <span class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2.5 pt-8 text-left text-sm text-white">
+                {pick(data.title, locale)}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <script>
+    // Video facades → swap thumbnail for real embed only on click
+    document.querySelectorAll<HTMLButtonElement>('.video-facade').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://www.youtube-nocookie.com/embed/${btn.dataset.videoId}?autoplay=1&rel=0`;
+        iframe.allow = 'autoplay; encrypted-media; picture-in-picture;';
+        iframe.allowFullscreen = true;
+        iframe.title = btn.getAttribute('aria-label') ?? 'Video';
+        iframe.className = 'h-full w-full';
+        btn.replaceWith(iframe);
+      });
+    });
+
+    // Lightbox (shared pattern with memory wall)
+    const dlg = document.createElement('dialog');
+    dlg.id = 'lightbox';
+    dlg.className = 'bg-transparent p-0 backdrop:bg-black/75';
+    dlg.addEventListener('click', () => dlg.close());
+    document.body.append(dlg);
+    document.querySelectorAll<HTMLImageElement>('img[data-lightbox]').forEach((img) => {
+      img.addEventListener('click', () => {
+        dlg.innerHTML = '';
+        const big = document.createElement('img');
+        big.src = img.src; big.alt = img.alt;
+        big.className = 'mx-auto max-h-[88vh] rounded-lg shadow-2xl';
+        dlg.append(big);
+        dlg.showModal();
+      });
+    });
+  </script>
+</Base>

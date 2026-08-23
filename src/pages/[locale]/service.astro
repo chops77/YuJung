@@ -1,0 +1,62 @@
+---
+import { getEntry } from 'astro:content';
+import { locales, type Locale } from '../../config';
+import { t, pick, formatDate } from '../../i18n/ui';
+import Base from '../../layouts/Base.astro';
+
+export function getStaticParams() {
+  return locales.map((locale) => ({ params: { locale } }));
+}
+
+const locale = Astro.params.locale as Locale;
+const settings = (await getEntry('settings', 'settings'))!.data;
+if (!settings.sections.service) return Astro.redirect(`/${locale}/`);
+
+const service = (await getEntry('service', 'service'))?.data;
+if (!service) return Astro.redirect(`/${locale}/`);
+
+const $t = t(locale);
+// Inline parse (server-side) — don't import lib/firebase.ts here; it has browser side effects.
+const ytId = service.livestreamUrl?.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([\w-]{11})/)?.[1];
+---
+<Base title={$t('nav.service')}>
+  <section class="py-10">
+    <h1 class="text-center font-serif text-4xl">{$t('nav.service')}</h1>
+
+    <div class="mx-auto mt-10 max-w-xl space-y-4 rounded-2xl border hairline bg-white/50 p-8 text-center shadow-sm">
+      <p class="font-serif text-2xl tracking-wide">
+        {formatDate(service.date, locale)}
+        {service.time && <span class="mx-2 text-gold">·</span>}
+        {service.time && <span>{service.time}</span>}
+      </p>
+      <p class="text-lg text-ink/85">{pick(service.venue, locale)}</p>
+      {pick(service.address, locale) && <p class="leading-relaxed text-ink/60">{pick(service.address, locale)}</p>}
+
+      {(service.mapsUrl || service.livestreamUrl) && (
+        <div class="flex flex-wrap justify-center gap-3 pt-3">
+          {service.mapsUrl && (
+            <a href={service.mapsUrl} target="_blank" rel="noopener noreferrer"
+               class="rounded-full border border-gold px-5 py-2 text-sm text-gold-deep transition-colors hover:bg-gold hover:text-white">
+              {$t('service.where')} ↗
+            </a>
+          )}
+          {service.livestreamUrl && !ytId && (
+            <a href={service.livestreamUrl} target="_blank" rel="noopener noreferrer"
+               class="rounded-full bg-ink px-5 py-2 text-sm text-parchment transition-colors hover:bg-gold-deep">
+              {$t('service.livestream')} ↗
+            </a>
+          )}
+        </div>
+      )}
+    </div>
+
+    {ytId && (
+      <div class="mx-auto mt-10 aspect-video max-w-3xl overflow-hidden rounded-xl shadow-md ring-1 ring-black/10">
+        <iframe src={`https://www.youtube-nocookie.com/embed/${ytId}`}
+                title={$t('service.livestream')}
+                allow="encrypted-media; picture-in-picture;" allowfullscreen
+                class="h-full w-full"></iframe>
+      </div>
+    )}
+  </section>
+</Base>

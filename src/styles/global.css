@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  /* Warm, restrained memorial palette — tune freely */
+  --color-parchment: #f7f3ec;
+  --color-ink: #2b2926;
+  --color-gold: #b08d57;
+  --color-gold-deep: #8a6a38;   /* contrast-safe accent for small text */
+  --color-sage: #8a9b84;
+
+  --font-serif: "Cormorant Garamond", "Noto Serif TC", "Noto Serif SC", Georgia, serif;
+  --font-body: "Source Sans 3", "Noto Sans TC", "Noto Sans SC", system-ui, sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+/* Elegant thin rule used between sections */
+.hairline { border-color: rgb(43 41 38 / 0.12); }
+
+/* ── Accessibility ──────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}

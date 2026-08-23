@@ -1,0 +1,27 @@
+---
+import '../styles/global.css';
+import { defaultLocale } from '../config';
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>404 · Page Not Found</title>
+  </head>
+  <body class="flex min-h-screen items-center justify-center bg-parchment px-4 font-body text-ink">
+    <main class="max-w-md text-center">
+      <p aria-hidden="true" class="text-5xl">🕯️</p>
+      <h1 class="mt-6 font-serif text-3xl">Page not found</h1>
+      <p class="mt-2 text-ink/60">此頁面不存在　·　此页面不存在</p>
+      <a href={import.meta.env.BASE_URL}
+         class="mt-8 inline-block rounded-full bg-ink px-6 py-2.5 text-parchment transition-colors hover:bg-gold-deep">
+        ← Home · 首頁 / 首页
+      </a>
+      <noscript>
+        <p class="mt-3 text-xs text-ink/50">Default language: /{defaultLocale}/</p>
+      </noscript>
+    </main>
+  </body>
+</html>
