@@ -163,6 +163,6 @@ to the client beyond standard web config.
 
 ---
 
-In loving memory of YuJung · 永懷
+In loving memory of YuJung · 玉蓉
 
 *If this template helps you honor someone you loved, that is her kindness continuing onward.*
