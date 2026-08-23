@@ -6,7 +6,7 @@ import { t, pick, formatDate } from '../../i18n/ui';
 import Base from '../../layouts/Base.astro';
 import Hero from '../../components/Hero.astro';
 
-export function getStaticParams() {
+export function getStaticPaths() {
   return locales.map((locale) => ({ params: { locale } }));
 }
 

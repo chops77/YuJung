@@ -3,9 +3,8 @@ import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  // TODO: replace <user> and <repo>
-  site: 'https://<user>.github.io',
-  base: '/<repo>',
+  site: 'https://chops77.github.io',
+  base: '/YuJung/',
   trailingSlash: 'ignore',
   integrations: [sitemap()],
   vite: { plugins: [tailwindcss()] },

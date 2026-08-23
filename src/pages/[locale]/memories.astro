@@ -4,7 +4,7 @@ import { locales, intlLocale, type Locale } from '../../config';
 import { t } from '../../i18n/ui';
 import Base from '../../layouts/Base.astro';
 
-export function getStaticParams() {
+export function getStaticPaths() {
   return locales.map((locale) => ({ params: { locale } }));
 }
 
