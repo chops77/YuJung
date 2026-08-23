@@ -3,7 +3,7 @@ import { getAuth, signInAnonymously, signInWithEmailAndPassword,
          onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { getFirestore, collection, doc, addDoc, getDoc, getDocs,
          updateDoc, deleteDoc, query, where, orderBy, limit,
-         onSnapshot, serverTimestamp, runTransaction, type DocumentData } from 'firebase/firestore';
+         onSnapshot, serverTimestamp, runTransaction, setDoc, type DocumentData } from 'firebase/firestore';
 import { initializeAppCheck, ReCaptchaV3Provider, type AppCheck } from 'firebase/app-check';
 
 // Public by design — security lives in firestore.rules / storage.rules + App Check.
@@ -103,10 +103,19 @@ export async function lightCandleOnce(): Promise<boolean> {
   const KEY = 'candle-lit';
   if (localStorage.getItem(KEY)) return false;          // one per visitor
   await ensureGuest();
+  const ref = doc(db, 'candles', 'counter');
+  // tx.get() throws on non-existent documents, so the very first candle
+  // must be written outside the transaction (create path).
+  if (!(await getDoc(ref)).exists()) {
+    try {
+      await setDoc(ref, { count: 1 });
+      localStorage.setItem(KEY, '1');
+      return true;
+    } catch { /* lost a create race — fall through to the update path */ }
+  }
   await runTransaction(db, async tx => {
-    const ref = doc(db, 'candles', 'counter');
     const snap = await tx.get(ref);
-    tx.set(ref, { count: (snap.exists() ? snap.data().count : 0) + 1 }, { merge: true });
+    tx.set(ref, { count: (Number(snap.data()?.count) || 0) + 1 });
   });
   localStorage.setItem(KEY, '1');
   return true;
