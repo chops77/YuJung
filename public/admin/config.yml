@@ -6,10 +6,11 @@ locale: 'en'
 # ─── Backend: GitHub via Netlify Identity (auth-only proxy) ─────────────
 # Decap ignores auth_type/app_id for the github backend, so we use a free
 # Netlify site purely as the OAuth broker (see LAUNCH-CHECKLIST step 13).
+# NOTE: Decap reads `site_domain` here — `site_id` would be ignored.
 backend:
   name: github
   repo: 'chops77/YuJung'
-  site_id: '4cb11319-e73b-4f62-9440-1c8cde3567a1'
+  site_domain: '4cb11319-e73b-4f62-9440-1c8cde3567a1'
 
 # Local development only — uncomment, run `npx decap-server`,
 # open http://localhost:4321/admin/ , and RE-COMMENT before deploying!
