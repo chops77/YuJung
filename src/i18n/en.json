@@ -40,6 +40,7 @@
 
   "wall.count": "{count} memories shared",
   "wall.empty": "No memories yet — be the first to share one.",
+  "wall.error": "Couldn't load memories — please check your connection and refresh.",
 
   "comments.show": "Comments",
   "comments.add": "Write a comment…",

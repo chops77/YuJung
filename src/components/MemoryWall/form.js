@@ -70,6 +70,7 @@ export function initForm() {
       setTimeout(() => (status.textContent = ''), 8000);
       setTimeout(() => (submit.disabled = false), COOLDOWN_MS);   // gentle rate-limit
     } catch (err) {
+      console.error('share memory failed:', err);
       status.textContent = err.code === 'invalid-video' ? STR['form.invalidVideo'] : STR['errors.generic'];
       submit.disabled = false;
     }

@@ -113,7 +113,6 @@ export function initWall(langTag) {
       root.append(el('p', { class: 'py-12 text-center text-ink/50 md:col-span-2', text: STR['wall.empty'] }));
       return;
     }
-
     for (const card of cards) {
       const long = card.message.length > 400;
       const txt = el('span');
@@ -143,6 +142,13 @@ export function initWall(langTag) {
       ]);
       root.append(cardEl);
     }
+  }, err => {
+    console.error('memory wall:', err);
+    root.innerHTML = '';
+    root.append(el('p', {
+      class: 'py-12 text-center text-ink/50 md:col-span-2',
+      text: STR['wall.error'] ?? STR['errors.generic'],
+    }));
   });
 }
 

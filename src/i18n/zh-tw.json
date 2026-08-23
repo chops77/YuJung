@@ -40,6 +40,7 @@
 
   "wall.count": "已分享 {count} 則回憶",
   "wall.empty": "還沒有任何回憶，歡迎成為第一位分享者。",
+  "wall.error": "無法載入回憶——請檢查網路連線後重新整理。",
 
   "comments.show": "留言",
   "comments.add": "寫下您的留言…",

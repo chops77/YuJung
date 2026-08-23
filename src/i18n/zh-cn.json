@@ -40,6 +40,7 @@
 
   "wall.count": "已分享 {count} 条回忆",
   "wall.empty": "还没有任何回忆，欢迎成为第一位分享者。",
+  "wall.error": "无法加载回忆——请检查网络连接后刷新。",
 
   "comments.show": "留言",
   "comments.add": "写下您的评论…",
