@@ -1,0 +1,21 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "memories",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "hidden", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "comments",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        { "fieldPath": "hidden", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

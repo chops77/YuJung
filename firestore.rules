@@ -34,7 +34,9 @@ service cloud.firestore {
 
     match /candles/{id} {
       allow read: if true;
-      allow create: if request.auth != null;
+      // lightCandleOnce runs a transaction that get()s then set(merge)s the
+      // counter doc — merging into an existing doc counts as an update.
+      allow create, update: if request.auth != null;
     }
 
     match /admins/{uid} {

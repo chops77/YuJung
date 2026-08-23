@@ -28,13 +28,14 @@
   "form.relationOptional": "Relationship (optional)",
   "form.message": "Your message",
   "form.submit": "Submit",
-  "form.photo": "Attach a photo (optional)",
-  "form.photoHint": "JPEG/PNG/WebP · resized automatically",
+  "form.photo": "Photo link (optional)",
+  "form.photoHint": "Paste an https:// link to an image",
   "form.videoUrl": "Video link (optional)",
   "form.videoHint": "Paste a YouTube link",
   "form.success": "Thank you — your memory has been shared.",
   "form.cooldown": "Please wait a moment before posting again.",
   "form.invalidVideo": "That doesn't look like a YouTube link.",
+  "form.invalidLink": "That doesn't look like a valid https:// image link.",
 
   "errors.generic": "Something went wrong. Please try again.",
 

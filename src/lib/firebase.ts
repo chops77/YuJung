@@ -4,7 +4,6 @@ import { getAuth, signInAnonymously, signInWithEmailAndPassword,
 import { getFirestore, collection, doc, addDoc, getDoc, getDocs,
          updateDoc, deleteDoc, query, where, orderBy, limit,
          onSnapshot, serverTimestamp, runTransaction, type DocumentData } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { initializeAppCheck, ReCaptchaV3Provider, type AppCheck } from 'firebase/app-check';
 
 // Public by design — security lives in firestore.rules / storage.rules + App Check.
@@ -33,7 +32,6 @@ export function ensureAppCheck() {
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-const storage = getStorage(app);
 
 /* ───────────────────────── Guest side ───────────────────────── */
 
@@ -90,22 +88,7 @@ export async function fetchComments(cardId: string) {
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
-/** Compresses an image client-side, uploads, returns a media entry. */
-export async function uploadGuestPhoto(file: File): Promise<{ type: 'image'; url: string }> {
-  await ensureGuest();
-  const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
-  const canvas = document.createElement('canvas');
-  canvas.width = Math.round(bitmap.width * scale);
-  canvas.height = Math.round(bitmap.height * scale);
-  canvas.getContext('2d')!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  const blob = await new Promise<Blob | null>(r => canvas.toBlob(r, 'image/jpeg', 0.82));
-  if (!blob) throw new Error('compress-failed');
-  const path = `guest-media/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
-  const snap = await uploadBytes(ref(storage, path), blob, { contentType: 'image/jpeg' });
-  return { type: 'image', url: await getDownloadURL(snap.ref) };
-}
-
+/** Guest photos are linked by URL — Firebase Storage needs a paid plan. */
 export function parseYouTubeId(url: string): string | null {
   const m = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([\w-]{11})/);
   return m ? m[1] : null;

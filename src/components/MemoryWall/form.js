@@ -1,5 +1,5 @@
 import { el } from './dom';
-import { addMemory, uploadGuestPhoto, parseYouTubeId } from '../../lib/firebase';
+import { addMemory, parseYouTubeId } from '../../lib/firebase';
 
 const STR = JSON.parse(document.getElementById('wall-i18n').textContent);
 const COOLDOWN_MS = 45000;
@@ -12,11 +12,12 @@ export function initForm() {
   const name = el('input', { class: field, required: '', maxlength: '60', autocomplete: 'name' });
   const relation = el('input', { class: field, maxlength: '60' });
   const message = el('textarea', { rows: '5', maxlength: '2000', class: field + ' resize-y' });
-  const photo = el('input', { type: 'file', accept: 'image/jpeg,image/png,image/webp',
-    class: 'block w-full text-sm text-ink/70 file:mr-3 file:rounded-full file:border-0 file:bg-ink file:px-4 file:py-1.5 file:text-parchment' });
+  const photoUrl = el('input', { type: 'url', placeholder: 'https://…/photo.jpg', class: field + ' text-sm' });
   const videoUrl = el('input', { type: 'url', placeholder: 'https://youtube.com/watch?v=…', class: field + ' text-sm' });
   // Bots auto-fill every visible input; humans never see or fill this one.
-  const honeypot = el('input', { type: 'text', name: 'website', tabindex: '-1', autocomplete: 'off',
+  // Name is deliberately meaningless — "website"-style names get autofilled
+  // by password managers, which would silently swallow real submissions.
+  const honeypot = el('input', { type: 'text', name: 'xy_extra_field', tabindex: '-1', autocomplete: 'off',
     'aria-hidden': 'true', class: 'absolute opacity-0 h-0 w-0 -z-10 pointer-events-none' });
   const submit = el('button', { type: 'submit',
     class: 'rounded-full bg-ink px-8 py-3 text-parchment transition-colors hover:bg-gold-deep disabled:opacity-50 disabled:hover:bg-ink',
@@ -33,7 +34,7 @@ export function initForm() {
     labeled(STR['form.relationOptional'], relation),
     labeled(STR['form.message'], message),
     el('div', { class: 'grid gap-5 sm:grid-cols-2' }, [
-      labeled(STR['form.photo'], photo, STR['form.photoHint']),
+      labeled(STR['form.photo'], photoUrl, STR['form.photoHint']),
       labeled(STR['form.videoUrl'], videoUrl, STR['form.videoHint']),
     ]),
     el('div', { class: 'text-center' }, [submit]),
@@ -42,7 +43,7 @@ export function initForm() {
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (honeypot.value) { status.textContent = STR['form.success']; return; }  // silently drop bots
+    if (honeypot.value) { console.warn('submission dropped: honeypot filled'); status.textContent = STR['form.success']; return; }  // silently drop bots
     if (submit.disabled) { status.textContent = STR['form.cooldown']; return; }
 
     const msgText = message.value.trim();
@@ -51,9 +52,13 @@ export function initForm() {
     submit.disabled = true;
     status.textContent = '';
     try {
-      const media = [];
-      if (photo.files[0]) media.push(await uploadGuestPhoto(photo.files[0]));
-      const yt = videoUrl.value.trim();
+    const media = [];
+    const pic = photoUrl.value.trim();
+    if (pic) {
+      if (!/^https:\/\/\S+$/.test(pic)) throw Object.assign(new Error(), { code: 'invalid-link' });
+      media.push({ type: 'image', url: pic });
+    }
+    const yt = videoUrl.value.trim();
       if (yt) {
         if (!parseYouTubeId(yt)) throw Object.assign(new Error(), { code: 'invalid-video' });
         media.push({ type: 'video', url: yt });
@@ -71,7 +76,10 @@ export function initForm() {
       setTimeout(() => (submit.disabled = false), COOLDOWN_MS);   // gentle rate-limit
     } catch (err) {
       console.error('share memory failed:', err);
-      status.textContent = err.code === 'invalid-video' ? STR['form.invalidVideo'] : STR['errors.generic'];
+      status.textContent =
+        err.code === 'invalid-video' ? STR['form.invalidVideo'] :
+        err.code === 'invalid-link'  ? STR['form.invalidLink']  :
+        STR['errors.generic'];
       submit.disabled = false;
     }
   });
