@@ -3,14 +3,15 @@ site_url: 'https://chops77.github.io/YuJung'
 display_url: 'https://chops77.github.io/YuJung'
 locale: 'en'
 
-# ─── Backend: git-gateway via Netlify Identity ───────────────────────────
-# The site itself lives on GitHub Pages; this free Netlify site exists only
-# to provide Identity logins (invite-only) and Git Gateway commit proxying.
-# Family members sign in with their invited email/password or GitHub.
+# ─── Backend: GitHub with self-hosted OAuth proxy ────────────────────────
+# GitHub requires a server-side token exchange that static hosting can't do,
+# so a small Cloudflare Worker (sveltia-cms-auth) brokers the login.
+# Family members sign in with their own GitHub accounts; access = repo push.
+# Docs: https://github.com/sveltia/sveltia-cms-auth
 backend:
-  name: git-gateway
-  identity_url: 'https://cerulean-salamander-3bda00.netlify.app/.netlify/identity'
-  gateway_url: 'https://cerulean-salamander-3bda00.netlify.app/.netlify/git'
+  name: github
+  repo: 'chops77/YuJung'
+  base_url: 'https://sveltia-cms-auth.chaops77.workers.dev'
 
 # Local development only — uncomment, run `npx decap-server`,
 # open http://localhost:4321/admin/ , and RE-COMMENT before deploying!
