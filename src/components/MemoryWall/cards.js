@@ -5,7 +5,7 @@ import { el, relTime, youTubeEmbedUrl } from './dom';
 export function showDialog(src) {
   let dlg = document.getElementById('lightbox');
   if (!dlg) {
-    dlg = el('dialog', { id: 'lightbox', class: 'backdrop:bg-black/70 bg-transparent p-0' });
+    dlg = el('dialog', { id: 'lightbox', class: 'm-auto max-w-[92vw] backdrop:bg-black/70 bg-transparent p-0' });
     dlg.addEventListener('click', () => dlg.close());
     document.body.append(dlg);
   }

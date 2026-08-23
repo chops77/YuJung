@@ -85,7 +85,7 @@ const videos = (await getCollection('videos')).sort((a, b) => a.data.order - b.d
     // Lightbox (shared pattern with memory wall)
     const dlg = document.createElement('dialog');
     dlg.id = 'lightbox';
-    dlg.className = 'bg-transparent p-0 backdrop:bg-black/75';
+    dlg.className = 'm-auto max-w-[92vw] bg-transparent p-0 backdrop:bg-black/75';
     dlg.addEventListener('click', () => dlg.close());
     document.body.append(dlg);
     document.querySelectorAll<HTMLImageElement>('img[data-lightbox]').forEach((img) => {
