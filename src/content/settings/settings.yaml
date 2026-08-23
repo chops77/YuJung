@@ -1,16 +1,16 @@
 siteTitle:
-  en: "In Loving Memory of Lily Wong"
-  zh_tw: "永懷　黃麗蓮"
-  zh_cn: "永远怀念　黄丽莲"
+  en: In Loving Memory of YuJung Chao
+  zh_tw: 永懷　曹玉蓉
+  zh_cn: 永远怀念　曹玉蓉
 sections:
   lifeStory: true
   timeline: true
   gallery: true
   memories: true
-  service: true     # switch off once services conclude
+  service: true
   donations: false
-contactEmail: "family@example.com"
+contactEmail: familychao888@gmail.com
 footerNote:
-  en: "This site is maintained by her family."
-  zh_tw: "本網站由家屬維護。"
-  zh_cn: "本网站由家属维护。"
+  en: This site is maintained by her family.
+  zh_tw: 本網站由家屬維護。
+  zh_cn: 本网站由家属维护。
