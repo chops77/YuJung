@@ -95,9 +95,9 @@ const alternates = locales.map((l) => ({
 
     <header class="sticky top-0 z-30 border-b hairline bg-parchment/90 backdrop-blur">
       <div class="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4">
-        <a href={homeUrl} class="shrink-0 font-serif text-lg tracking-wide">{siteTitle}</a>
+        <a href={homeUrl} title={siteTitle} class="min-w-0 truncate font-serif text-base tracking-wide sm:text-lg">{siteTitle}</a>
 
-        <nav aria-label={$t('common.menu')} class="hidden md:block">
+        <nav aria-label={$t('common.menu')} class="hidden lg:block">
           <ul class="flex items-center gap-5 text-[15px]">
             {NAV.map(({ slug: s, key }) => (
               <li>
@@ -116,9 +116,9 @@ const alternates = locales.map((l) => ({
           </ul>
         </nav>
 
-        <div class="flex items-center gap-3">
+        <div class="flex shrink-0 items-center gap-1.5 sm:gap-3">
           <LanguageSwitcher locale={locale} currentSlug={slug} />
-          <details class="relative md:hidden">
+          <details class="relative lg:hidden">
             <summary class="cursor-pointer list-none rounded p-2 hover:bg-black/5" aria-label={$t('common.menu')}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
             </summary>

@@ -75,12 +75,15 @@ body {
   box-shadow: var(--shadow-soft);
 }
 
-/* Small-caps kicker used above section titles */
-.kicker {
-  font-size: 0.72rem;
-  letter-spacing: 0.35em;
-  text-transform: uppercase;
-  color: var(--color-gold-deep);
+/* Small-caps kicker used above section titles.
+   Layered so Tailwind utilities can override it per use. */
+@layer components {
+  .kicker {
+    font-size: 0.72rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--color-gold-deep);
+  }
 }
 
 /* ── Reveal on scroll ───────────────────────────────── */
