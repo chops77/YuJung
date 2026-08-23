@@ -13,7 +13,7 @@ export function initCandle(labelLight, templateLit) {
 
   btn.addEventListener('click', async () => {
     btn.disabled = true;
-    try { await lightCandleOnce(); btn.classList.add('lit'); } catch { /* offline — ignore */ }
+    try { await lightCandleOnce(); btn.classList.add('lit'); } catch (e) { console.error('light candle failed:', e); }
     btn.disabled = false;
   });
 }
