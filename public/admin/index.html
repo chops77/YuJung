@@ -7,6 +7,26 @@
   <title>Content Manager · Memorial Site</title>
 </head>
 <body>
+  <!-- Netlify Identity widget: required by the git-gateway backend. -->
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script>
+    // Auth lives on a separate Netlify project (see config.yml), so point the
+    // widget there explicitly — and intercept every future init() call,
+    // because Decap re-inits without arguments, which would otherwise reset
+    // the API URL to the current origin.
+    (function () {
+      var AUTH_URL = 'https://cerulean-salamander-3bda00.netlify.app/.netlify/identity';
+      var id = window.netlifyIdentity;
+      if (!id) return;
+      var realInit = id.init.bind(id);
+      id.init = function (opts) {
+        opts = opts || {};
+        opts.APIUrl = opts.APIUrl || AUTH_URL;
+        return realInit(opts);
+      };
+      id.init();
+    })();
+  </script>
   <script src="https://unpkg.com/decap-cms@^3.1.0/dist/decap-cms.js"></script>
 </body>
 </html>
