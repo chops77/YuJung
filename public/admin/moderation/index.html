@@ -43,6 +43,7 @@
 <script type="module">
   /* ▼▼ PASTE THE SAME FIREBASE CONFIG AS YOUR .env VALUES HERE ▼▼ */
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js';
+  import { initializeAppCheck, ReCaptchaV3Provider } from 'https://www.gstatic.com/firebasejs/11.1.0/firebase-app-check.js';
   import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut }
     from 'https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js';
   import { getFirestore, collection, getDocs, getDoc, doc, updateDoc, deleteDoc,
@@ -56,8 +57,19 @@
     storageBucket: "yujung-f26b1.firebasestorage.app",
     appId: "1:986137715695:web:76abf13e0732980933cc1a",
   };
+  const recaptchaSiteKey = "";
 
   const app = initializeApp(firebaseConfig);
+  // Match the main site: without a valid App Check token every Firestore
+  // request is rejected when enforcement is enabled in the console.
+  if (recaptchaSiteKey) {
+    try {
+      initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider(recaptchaSiteKey),
+        isAutoRefreshEnabled: true,
+      });
+    } catch (e) { console.error('app check init failed:', e); }
+  }
   const auth = getAuth(app), db = getFirestore(app);
 
   const $ = id => document.getElementById(id);
@@ -79,9 +91,14 @@
   });
 
   window.loadCards = async function () {
-    const snap = await getDocs(query(collection(db, 'memories'), orderBy('createdAt', 'desc'), limit(300)));
-    cards = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    render();
+    try {
+      const snap = await getDocs(query(collection(db, 'memories'), orderBy('createdAt', 'desc'), limit(300)));
+      cards = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      render();
+    } catch (e) {
+      console.error('loadCards failed:', e);
+      alert('Failed to load memories:\n' + (e.message || e));
+    }
   };
 
   function render() {

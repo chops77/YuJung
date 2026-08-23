@@ -8,7 +8,11 @@ service cloud.firestore {
     }
 
     match /memories/{card} {
-      allow read: if resource.data.hidden != true;
+      // "Rules are not filters": a LIST query is denied unless its own
+      // constraints guarantee compliance — so admins get unrestricted read
+      // (moderation lists everything), while guests may only ever read
+      // non-hidden cards (the wall query filters hidden == false).
+      allow read: if isAdmin() || resource.data.hidden != true;
       allow create: if request.auth != null
         && request.resource.data.authorName is string
         && request.resource.data.authorName.size() > 0
@@ -21,7 +25,7 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
 
       match /comments/{comment} {
-        allow read: if resource.data.hidden != true;
+        allow read: if isAdmin() || resource.data.hidden != true;
         allow create: if request.auth != null
           && request.resource.data.text is string
           && request.resource.data.text.size() > 0
