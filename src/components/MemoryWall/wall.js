@@ -54,6 +54,13 @@ function commentSection(card) {
   const listEl = el('div', { class: 'space-y-2' },
     [el('p', { class: 'text-sm text-ink/50', text: STR['comments.none'] })]);
 
+  const nameIn = el('input', {
+    class: 'w-full rounded-md border hairline bg-white/60 px-3 py-2 text-sm outline-none focus:border-gold',
+    placeholder: STR['comments.yourName'], maxlength: '60' });
+  // Remember the visitor's chosen display name across cards — never reuse
+  // the memory author's name automatically.
+  nameIn.value = sessionStorage.getItem('commenter-name') || '';
+
   const input = el('input', { class: 'w-full rounded-md border hairline bg-white/60 px-3 py-2 text-sm outline-none focus:border-gold',
     placeholder: STR['comments.add'], maxlength: '1000' });
   const send = el('button', { type: 'button',
@@ -61,19 +68,23 @@ function commentSection(card) {
     text: STR['comments.send'] });
 
   send.addEventListener('click', async () => {
+    const name = nameIn.value.trim();
     const text = input.value.trim();
-    const name = sessionStorage.getItem('guest-name') || '—';
-    if (!text || send.disabled) return;
+    if (!name || !text || send.disabled) return;
     send.disabled = true;
     try {
+      sessionStorage.setItem('commenter-name', name);
       await addComment(card.id, { authorName: name, text });
       input.value = '';
       await loadCommentsInto(listEl, card.id);
-    } catch { alert(STR['errors.generic']); }
+    } catch (e) { console.error('add comment failed:', e); alert(STR['errors.generic']); }
     send.disabled = false;
   });
 
-  const composeRow = el('div', { class: 'flex gap-2' }, [input, send]);
+  const composeRow = el('div', { class: 'flex flex-col gap-2' }, [
+    nameIn,
+    el('div', { class: 'flex gap-2' }, [input, send]),
+  ]);
   const wrap = el('div', { class: 'hidden border-t hairline mt-3 pt-3 space-y-3' });
   wrap.append(listEl, composeRow);
 

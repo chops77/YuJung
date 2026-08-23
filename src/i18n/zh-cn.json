@@ -47,5 +47,6 @@
   "service.livestream": "观看直播",
   "donations.intro": "若您想向逝者致意，家属诚挚建议将心意化为捐款，支持以下机构。",
   "donations.cta": "捐赠",
-  "form.invalidLink": "这个图片链接似乎不正确。"
+  "form.invalidLink": "这个图片链接似乎不正确。",
+  "comments.yourName": "您的姓名"
 }

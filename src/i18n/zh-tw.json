@@ -47,5 +47,6 @@
   "service.livestream": "觀看直播",
   "donations.intro": "若您想向先人致意，家屬誠摯建議將心意化為捐款，支持以下機構。",
   "donations.cta": "捐款",
-  "form.invalidLink": "這個圖片連結似乎不正確。"
+  "form.invalidLink": "這個圖片連結似乎不正確。",
+  "comments.yourName": "您的姓名"
 }

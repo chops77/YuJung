@@ -63,7 +63,6 @@ export function initForm() {
         if (!parseYouTubeId(yt)) throw Object.assign(new Error(), { code: 'invalid-video' });
         media.push({ type: 'video', url: yt });
       }
-      sessionStorage.setItem('guest-name', name.value.trim());
       await addMemory({
         authorName: name.value.trim(),
         relation: relation.value.trim(),
