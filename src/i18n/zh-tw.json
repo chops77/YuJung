@@ -40,6 +40,7 @@
   "comments.none": "尚無留言。",
   "candle.light": "點燭致意",
   "candle.lit": "已點亮 {count} 盞燭光",
+  "candle.wait": "{seconds} 秒後可再點一盞",
   "gallery.photos": "相片",
   "gallery.videos": "影片",
   "service.when": "日期時間",

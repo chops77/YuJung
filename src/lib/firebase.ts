@@ -3,7 +3,8 @@ import { getAuth, signInAnonymously, signInWithEmailAndPassword,
          onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { getFirestore, collection, doc, addDoc, getDoc, getDocs,
          updateDoc, deleteDoc, query, where, orderBy, limit,
-         onSnapshot, serverTimestamp, runTransaction, setDoc, type DocumentData } from 'firebase/firestore';
+         onSnapshot, serverTimestamp, runTransaction,
+         type DocumentData, type DocumentReference } from 'firebase/firestore';
 import { initializeAppCheck, ReCaptchaV3Provider, type AppCheck } from 'firebase/app-check';
 
 // Public by design — security lives in firestore.rules / storage.rules + App Check.
@@ -95,30 +96,49 @@ export function parseYouTubeId(url: string): string | null {
 }
 
 /* Candle */
+const CANDLE_COOLDOWN_MS = 60_000;
+
 export function subscribeCandle(cb: (count: number) => void) {
   ensureGuest().then(() =>
     onSnapshot(doc(db, 'candles', 'counter'), s => cb(s.exists() ? s.data().count : 0)));
 }
-export async function lightCandleOnce(): Promise<boolean> {
-  const KEY = 'candle-lit';
-  if (localStorage.getItem(KEY)) return false;          // one per visitor
-  await ensureGuest();
-  const ref = doc(db, 'candles', 'counter');
-  // tx.get() throws on non-existent documents, so the very first candle
-  // must be written outside the transaction (create path).
-  if (!(await getDoc(ref)).exists()) {
-    try {
-      await setDoc(ref, { count: 1 });
-      localStorage.setItem(KEY, '1');
-      return true;
-    } catch { /* lost a create race — fall through to the update path */ }
+
+/** Milliseconds until this visitor may light again (0 = right now). */
+export async function candleCooldown(): Promise<number> {
+  const user = await ensureGuest();
+  const snap = await getDoc(doc(db, 'candles', 'lit', user.uid));
+  const last = snap.data()?.lastLitAt?.toMillis?.() ?? 0;
+  return Math.max(0, CANDLE_COOLDOWN_MS - (Date.now() - last));
+}
+
+class CandleCooldownError extends Error {
+  constructor(public remainingMs: number) { super('candle cooldown'); }
+}
+
+/** Light one more candle. Resolves { ok: false, remainingMs } while cooling down. */
+export async function lightCandle(): Promise<{ ok: boolean; remainingMs: number }> {
+  const user = await ensureGuest();
+  const counterRef = doc(db, 'candles', 'counter');
+  const litRef = doc(db, 'candles', 'lit', user.uid);
+  try {
+    await runTransaction(db, async tx => {
+      // tx.get() may throw on non-existent documents (first-ever candle);
+      // treat that as absent — the set() below creates it.
+      const safeGet = async (ref: DocumentReference) => {
+        try { return await tx.get(ref); } catch { return undefined; }
+      };
+      const [counterSnap, litSnap] = await Promise.all([safeGet(counterRef), safeGet(litRef)]);
+      const last = litSnap?.data()?.lastLitAt?.toMillis?.() ?? 0;
+      const remainingMs = CANDLE_COOLDOWN_MS - (Date.now() - last);
+      if (remainingMs > 0) throw new CandleCooldownError(remainingMs);
+      tx.set(counterRef, { count: (Number(counterSnap?.data()?.count) || 0) + 1 });
+      tx.set(litRef, { lastLitAt: serverTimestamp() });
+    });
+    return { ok: true, remainingMs: 0 };
+  } catch (err) {
+    if (err instanceof CandleCooldownError) return { ok: false, remainingMs: err.remainingMs };
+    throw err;
   }
-  await runTransaction(db, async tx => {
-    const snap = await tx.get(ref);
-    tx.set(ref, { count: (Number(snap.data()?.count) || 0) + 1 });
-  });
-  localStorage.setItem(KEY, '1');
-  return true;
 }
 
 /* ───────────────────────── Admin side ───────────────────────── */

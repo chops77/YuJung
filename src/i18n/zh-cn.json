@@ -40,6 +40,7 @@
   "comments.none": "暂无评论。",
   "candle.light": "点烛致敬",
   "candle.lit": "已点亮 {count} 支蜡烛",
+  "candle.wait": "{seconds} 秒后可再点一支",
   "gallery.photos": "照片",
   "gallery.videos": "视频",
   "service.when": "日期时间",

@@ -102,6 +102,44 @@ html.js [data-reveal].revealed {
   transform: none;
 }
 
+/* ── Memorial candle ────────────────────────────────── */
+/* The flame burns once .lit is applied; each additional
+   light re-triggers the .pulse glow beat. */
+.candle-btn .glow {
+  background: radial-gradient(circle, rgb(240 165 80 / 0.45), transparent 70%);
+  opacity: 0;
+  transform: scale(0.7);
+  transition: opacity .6s var(--ease-graceful), transform .6s var(--ease-graceful);
+}
+.candle-btn.lit .glow {
+  opacity: 1;
+  transform: scale(1);
+}
+.candle-btn .flame,
+.candle-btn .flame-inner {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+.candle-btn.lit .flame,
+.candle-btn.lit .flame-inner {
+  animation: flame-flicker 2.2s ease-in-out infinite alternate;
+}
+.candle-btn.pulse {
+  animation: candle-pulse .7s var(--ease-graceful);
+}
+
+@keyframes flame-flicker {
+  0%   { transform: scale(1) skewX(0);     }
+  25%  { transform: scale(1.06) skewX(-2deg); }
+  50%  { transform: scale(0.96) skewX(1.5deg); }
+  75%  { transform: scale(1.04) skewX(-1deg);  }
+  100% { transform: scale(1) skewX(0);     }
+}
+@keyframes candle-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(240 165 80 / 0); }
+  50%      { box-shadow: 0 0 26px 8px rgb(240 165 80 / 0.55); }
+}
+
 /* ── Accessibility ──────────────────────────────────── */
 :focus-visible {
   outline: 2px solid var(--color-gold);

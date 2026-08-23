@@ -36,11 +36,41 @@ service cloud.firestore {
       }
     }
 
-    match /candles/{id} {
+    /* Candle lighting: visitors may light repeatedly but at most one candle
+       per minute. Enforcement lives here, not in the client:
+         • counter may only ever go up by exactly 1 (admins exempt);
+         • each increment MUST be paired, in the same transaction, with a
+           fresh stamp of candles/lit/{uid} whose lastLitAt == request.time
+           (the client writes serverTimestamp(), so this holds);
+         • lit/{uid} itself accepts a stamp only once per cooldown window. */
+    function candleStampedThisWrite() {
+      return request.auth != null &&
+        getAfter(/databases/$(db)/documents/candles/lit/$(request.auth.uid))
+          .data.lastLitAt == request.time;
+    }
+
+    match /candles/counter {
       allow read: if true;
-      // lightCandleOnce runs a transaction that get()s then set(merge)s the
-      // counter doc — merging into an existing doc counts as an update.
-      allow create, update: if request.auth != null;
+      allow create: if isAdmin()
+        || (request.resource.data.keys().hasOnly(['count'])
+            && request.resource.data.count is number
+            && request.resource.data.count == 1
+            && candleStampedThisWrite());
+      allow update: if isAdmin()
+        || (request.resource.data.keys().hasOnly(['count'])
+            && request.resource.data.count is number
+            && request.resource.data.count == resource.data.count + 1
+            && candleStampedThisWrite());
+    }
+
+    match /candles/lit/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['lastLitAt'])
+        && request.resource.data.lastLitAt == request.time
+        && (!exists(resource)
+            || request.time >= resource.data.lastLitAt + duration.value(60, 's'));
+      allow delete: if false;
     }
 
     match /admins/{uid} {

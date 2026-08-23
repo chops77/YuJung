@@ -30,6 +30,7 @@ const wallStrings = JSON.stringify({
   'comments.yourName': $t('comments.yourName'),
   'comments.send': $t('comments.send'), 'comments.none': $t('comments.none'),
   'candle.light': $t('candle.light'), 'candle.lit': $t('candle.lit'),
+  'candle.wait': $t('candle.wait'),
 });
 ---
 <Base title={$t('nav.memories')}>
@@ -51,6 +52,7 @@ const wallStrings = JSON.stringify({
         </svg>
       </button>
       <p class="text-sm text-ink/60"><span data-count>…</span></p>
+      <p class="min-h-[1rem] text-xs text-ink/40" aria-live="polite"><span data-wait></span></p>
     </div>
   </section>
 
@@ -72,6 +74,6 @@ const wallStrings = JSON.stringify({
     initForm();
     initWall(strings.langTag);
     import('../../components/MemoryWall/candle').then(m =>
-      m.initCandle(strings['candle.light'], strings['candle.lit']));
+      m.initCandle(strings['candle.light'], strings['candle.lit'], strings['candle.wait']));
   </script>
 </Base>

@@ -41,6 +41,7 @@
   "comments.none": "No comments yet.",
   "candle.light": "Light a Candle",
   "candle.lit": "{count} candles lit",
+  "candle.wait": "next candle in {seconds}s",
   "gallery.photos": "Photos",
   "gallery.videos": "Videos",
   "service.when": "Date & Time",
