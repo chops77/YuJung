@@ -20,8 +20,7 @@ export function initPreview(strings, max = 3) {
     root.innerHTML = '';
 
     for (const card of latest) {
-      root.append(el('article',
-        { class: 'rounded-xl border hairline bg-white/50 p-5 shadow-sm' }, [
+      root.append(el('article', { class: 'card p-5' }, [
         headRow(card, strings.langTag),
         messageBlock(card.message),                       // CSS-clamped, no expand
         ...(card.media ?? []).slice(0, 1).map(mediaNode).filter(Boolean), // keep it compact

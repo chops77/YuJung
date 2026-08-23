@@ -3,6 +3,7 @@ import { getCollection, getEntry } from 'astro:content';
 import { locales, type Locale } from '../../config';
 import { t, pick, formatDate } from '../../i18n/ui';
 import Base from '../../layouts/Base.astro';
+import SectionHeader from '../../components/SectionHeader.astro';
 
 export function getStaticPaths() {
   return locales.map((locale) => ({ params: { locale } }));
@@ -19,26 +20,36 @@ const items = (await getCollection('timeline')).sort((a, b) =>
 );
 ---
 <Base title={$t('nav.timeline')}>
-  <section class="py-10">
-    <h1 class="text-center font-serif text-4xl">{$t('home.timelineTitle')}</h1>
+  <section class="py-12">
+    <SectionHeader as="h1" title={$t('home.timelineTitle')} />
 
-    <ol class="relative mx-auto mt-12 max-w-2xl list-none space-y-14 border-l-2 hairline pl-8 md:pl-12">
-      {items.map(({ data }) => (
-        <li class="relative">
+    <ol class="relative mx-auto mt-14 max-w-2xl list-none">
+      <!-- Fading rail -->
+      <span aria-hidden="true"
+            class="absolute bottom-6 left-[7px] top-2 w-px bg-gradient-to-b from-transparent via-gold/45 to-gold/55 md:left-[9px]"></span>
+
+      {items.map(({ data }, i) => (
+        <li class="group relative pb-14 pl-10 last:pb-0 md:pl-14"
+            data-reveal style={`--reveal-delay:${Math.min(i, 4) * 90}ms`}>
+          <!-- Marker: gold ring + inner dot that fills on hover -->
           <span aria-hidden="true"
-                class="absolute -left-[41px] top-1 h-4 w-4 rounded-full border-2 border-gold bg-parchment md:-left-[57px]"></span>
+                class="absolute left-0 top-1.5 grid h-[15px] w-[15px] place-items-center rounded-full border border-gold bg-parchment shadow-[0_0_0_4px_rgb(176_141_87/0.12)] transition-colors duration-300 group-hover:bg-gold/20 md:h-[19px] md:w-[19px]">
+            <span class="h-1.5 w-1.5 rounded-full bg-gold transition-transform duration-300 group-hover:scale-125"></span>
+          </span>
 
           <time datetime={data.date.toISOString().slice(0, 10)}
-                class="text-sm font-semibold uppercase tracking-wider text-gold-deep">
+                class="inline-block rounded-full border hairline bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-gold-deep">
             {formatDate(data.date, locale)}
           </time>
-          <h2 class="mt-1.5 font-serif text-2xl">{pick(data.title, locale)}</h2>
+          <h2 class="mt-3 font-serif text-2xl tracking-wide">{pick(data.title, locale)}</h2>
 
           {data.image && (
-            <img src={`${import.meta.env.BASE_URL}${data.image}`}
-                 alt={pick(data.title, locale)}
-                 loading="lazy"
-                 class="mt-4 w-full max-w-md rounded-lg object-cover shadow-sm ring-1 ring-black/10" />
+            <div class="mt-5 w-full max-w-md overflow-hidden rounded-xl ring-1 ring-black/10 shadow-[var(--shadow-soft)]">
+              <img src={`${import.meta.env.BASE_URL}${data.image}`}
+                   alt={pick(data.title, locale)}
+                   loading="lazy"
+                   class="aspect-[16/10] w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]" />
+            </div>
           )}
 
           <p class="mt-3 max-w-xl leading-relaxed text-ink/80 whitespace-pre-line">

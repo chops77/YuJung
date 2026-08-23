@@ -5,6 +5,7 @@ import { getRelativeLocaleUrl, getAbsoluteLocaleUrl } from 'astro:i18n';
 import { locales, defaultLocale, langTags, localeNames, type Locale } from '../config';
 import { t, pick } from '../i18n/ui';
 import LanguageSwitcher from '../components/LanguageSwitcher.astro';
+import Ornament from '../components/Ornament.astro';
 
 interface Props { title?: string; description?: string; ogImage?: string; }
 const { title, description, ogImage } = Astro.props;
@@ -75,6 +76,9 @@ const alternates = locales.map((l) => ({
     <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
     <meta name="theme-color" content="#f7f3ec" />
 
+    <!-- Marks JS availability before paint so scroll-reveal styles only apply then -->
+    <script is:inline>document.documentElement.classList.add('js');</script>
+
     <!-- Fonts: swap-heavy subsets; zh fonts fall back gracefully while loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -84,7 +88,7 @@ const alternates = locales.map((l) => ({
     />
   </head>
 
-  <body class="bg-parchment text-ink font-body antialiased min-h-screen flex flex-col selection:bg-gold/25">
+  <body class="text-ink font-body antialiased min-h-screen flex flex-col selection:bg-gold/25">
     <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-ink focus:text-parchment focus:px-3 focus:py-2">
       {$t('common.skipToContent')}
     </a>
@@ -135,12 +139,34 @@ const alternates = locales.map((l) => ({
     </main>
 
     <footer class="border-t hairline">
-      <div class="mx-auto max-w-5xl space-y-2 px-4 py-8 text-center text-sm text-ink/60">
-        <p class="font-serif text-base text-ink/80">
-          {pick(profile.name, locale)} · {profile.born.getFullYear()}–{profile.passed.getFullYear()}
+      <div class="mx-auto max-w-5xl space-y-3 px-4 py-10 text-center text-sm text-ink/60">
+        <Ornament />
+        <p class="pt-1 font-serif text-lg tracking-wide text-ink/85">
+          {pick(profile.name, locale)}
+          <span class="mx-1.5 text-gold" aria-hidden="true">·</span>
+          {profile.born.getFullYear()}–{profile.passed.getFullYear()}
         </p>
         {settings.footerNote && <p>{pick(settings.footerNote, locale)}</p>}
       </div>
     </footer>
+
+    <script>
+      // Reveal-on-scroll: progressive enhancement, disabled for reduced motion
+      const revealed = document.querySelectorAll('[data-reveal]');
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduce && 'IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) {
+              e.target.classList.add('revealed');
+              io.unobserve(e.target);
+            }
+          }
+        }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+        revealed.forEach((el) => io.observe(el));
+      } else {
+        revealed.forEach((el) => el.classList.add('revealed'));
+      }
+    </script>
   </body>
 </html>

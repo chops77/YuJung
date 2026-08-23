@@ -1,43 +1,48 @@
 ---
 import { t, pick, formatDate } from '../i18n/ui';
-import type { Locale } from '../config';
+import type { Locale } from '../../config';
 
 interface Props { locale: Locale; profile: any; }
 const { locale, profile } = Astro.props;
 const $t = t(locale);
 const initial = pick(profile.name, locale).trim().charAt(0) || '·';
 ---
-<section class="pt-14 pb-12 text-center">
-  <p class="text-xs uppercase tracking-[0.4em] text-gold-deep">{$t('hero.inLovingMemory')}</p>
 
-  <div class="relative mx-auto mt-8 h-56 w-56">
-    <div
-      class="absolute inset-0 flex items-center justify-center rounded-full bg-parchment font-serif text-7xl text-gold-deep ring-1 ring-black/10"
-      aria-hidden="true"
-    >
-      {initial}
+<section class="pt-16 pb-14 text-center">
+  <p class="kicker" data-reveal>{$t('hero.inLovingMemory')}</p>
+
+  <div class="mx-auto mt-10 w-60" data-reveal style="--reveal-delay: 90ms">
+    <!-- Arch frame — outer gold ring + inner hairline, echoing memorial architecture -->
+    <div class="rounded-t-full rounded-b-3xl bg-gradient-to-b from-gold/50 to-gold/20 p-[3px] shadow-[var(--shadow-lift)]">
+      <div class="relative flex h-72 items-center justify-center overflow-hidden rounded-t-full rounded-b-[calc(1.5rem-3px)] bg-parchment-deep">
+        <span class="font-serif text-8xl text-gold/70" aria-hidden="true">{initial}</span>
+        {profile.portrait && (
+          <img
+            src={`${import.meta.env.BASE_URL}${profile.portrait}`}
+            alt=""
+            width="240" height="288"
+            class="absolute inset-0 h-full w-full object-cover"
+            loading="eager"
+            onerror="this.remove()"
+          />
+        )}
+      </div>
     </div>
-    {profile.portrait && (
-      <img
-        src={`${import.meta.env.BASE_URL}${profile.portrait}`}
-        alt=""
-        width="224" height="224"
-        class="absolute inset-0 h-full w-full rounded-full object-cover shadow-md ring-1 ring-black/10"
-        loading="eager"
-        onerror="this.remove()"
-      />
-    )}
   </div>
 
-  <h1 class="mt-7 font-serif text-4xl sm:text-5xl tracking-wide">{pick(profile.name, locale)}</h1>
-  <p class="mt-4 text-ink/70">
+  <h1 class="mt-8 font-serif text-4xl tracking-wide sm:text-5xl" data-reveal style="--reveal-delay: 180ms">
+    {pick(profile.name, locale)}
+  </h1>
+
+  <p class="mt-4 text-ink/70" data-reveal style="--reveal-delay: 260ms">
     {formatDate(profile.born, locale)}
-    <span class="mx-2 text-gold">·</span>
+    <span class="mx-2 text-gold" aria-hidden="true">·</span>
     {formatDate(profile.passed, locale)}
   </p>
 
   {pick(profile.epitaph, locale) && (
-    <blockquote class="mx-auto mt-8 max-w-xl font-serif text-xl italic leading-relaxed text-ink/80">
+    <blockquote class="mx-auto mt-9 max-w-xl font-serif text-xl italic leading-relaxed text-ink/80"
+                data-reveal style="--reveal-delay: 340ms">
       “{pick(profile.epitaph, locale)}”
     </blockquote>
   )}

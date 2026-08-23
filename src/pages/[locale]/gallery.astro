@@ -3,6 +3,7 @@ import { getCollection, getEntry } from 'astro:content';
 import { locales, type Locale } from '../../config';
 import { t, pick } from '../../i18n/ui';
 import Base from '../../layouts/Base.astro';
+import SectionHeader from '../../components/SectionHeader.astro';
 
 export function getStaticPaths() {
   return locales.map((locale) => ({ params: { locale } }));
@@ -17,18 +18,20 @@ const photos = (await getCollection('photos')).sort((a, b) => a.data.order - b.d
 const videos = (await getCollection('videos')).sort((a, b) => a.data.order - b.data.order);
 ---
 <Base title={$t('nav.gallery')}>
-  <section class="py-10">
-    <h2 class="text-center font-serif text-3xl">{$t('gallery.photos')}</h2>
-    <div class="mt-8 columns-2 gap-4 md:columns-3 [&>*]:mb-4 break-inside-avoid">
-      {photos.map(({ data }) => (
-        <figure class="break-inside-avoid">
-          <img data-lightbox
-               src={`${import.meta.env.BASE_URL}${data.image}`}
-               alt={pick(data.alt, locale)}
-               loading="lazy"
-               class="w-full cursor-zoom-in rounded-lg shadow-sm ring-1 ring-black/10 transition hover:opacity-90" />
+  <section class="py-12">
+    <SectionHeader as="h1" title={$t('gallery.photos')} />
+    <div class="mt-10 columns-2 gap-4 md:columns-3 [&>*]:mb-4 break-inside-avoid">
+      {photos.map(({ data }, i) => (
+        <figure class="group break-inside-avoid" data-reveal style={`--reveal-delay:${Math.min(i % 6, 5) * 70}ms`}>
+          <div class="overflow-hidden rounded-xl ring-1 ring-black/10 shadow-[var(--shadow-soft)] transition-shadow duration-300 group-hover:shadow-[var(--shadow-lift)]">
+            <img data-lightbox
+                 src={`${import.meta.env.BASE_URL}${data.image}`}
+                 alt={pick(data.alt, locale)}
+                 loading="lazy"
+                 class="w-full cursor-zoom-in transition-transform duration-500 ease-out group-hover:scale-[1.04]" />
+          </div>
           {pick(data.caption, locale) && (
-            <figcaption class="mt-1.5 text-center text-xs text-ink/60">{pick(data.caption, locale)}</figcaption>
+            <figcaption class="mt-2 text-center text-xs tracking-wide text-ink/60">{pick(data.caption, locale)}</figcaption>
           )}
         </figure>
       ))}
@@ -36,20 +39,23 @@ const videos = (await getCollection('videos')).sort((a, b) => a.data.order - b.d
   </section>
 
   {videos.length > 0 && (
-    <section class="border-t hairline py-10">
-      <h2 class="text-center font-serif text-3xl">{$t('gallery.videos')}</h2>
-      <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {videos.map(({ data }) => (
+    <section class="border-t hairline py-12">
+      <SectionHeader title={$t('gallery.videos')} />
+      <div class="mt-9 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {videos.map(({ data }, i) => (
           <button
-            class="video-facade group relative aspect-video overflow-hidden rounded-xl bg-black shadow-sm ring-1 ring-black/10"
+            class="video-facade group relative aspect-video cursor-pointer overflow-hidden rounded-xl bg-black shadow-[var(--shadow-soft)] transition-shadow duration-300 hover:shadow-[var(--shadow-lift)]"
             data-video-id={data.youtubeId}
             aria-label={pick(data.title, locale) || $t('gallery.videos')}
+            data-reveal style={`--reveal-delay:${Math.min(i % 6, 5) * 70}ms`}
           >
             <img src={`https://i.ytimg.com/vi/${data.youtubeId}/hqdefault.jpg`}
                  alt="" loading="lazy"
-                 class="h-full w-full object-cover opacity-90 transition group-hover:scale-105 group-hover:opacity-100" />
+                 class="h-full w-full object-cover opacity-90 transition duration-500 ease-out group-hover:scale-[1.04] group-hover:opacity-100" />
             <span class="absolute inset-0 flex items-center justify-center">
-              <span class="flex h-14 w-14 items-center justify-center rounded-full bg-black/70 text-lg text-white transition group-hover:scale-110 group-hover:bg-gold-deep" aria-hidden="true">▶</span>
+              <span class="grid h-14 w-14 place-items-center rounded-full bg-black/65 text-white ring-1 ring-white/30 backdrop-blur-sm transition duration-300 group-hover:bg-gold-deep group-hover:ring-white/50" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.54.84l10-6.5a1 1 0 0 0 0-1.68l-10-6.5A1 1 0 0 0 8 5.5Z"/></svg>
+              </span>
             </span>
             {pick(data.title, locale) && (
               <span class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2.5 pt-8 text-left text-sm text-white">

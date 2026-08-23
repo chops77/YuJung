@@ -90,7 +90,7 @@ export function initWall(langTag) {
       return;
     }
     for (const card of cards) {
-      const cardEl = el('article', { class: 'rounded-xl border hairline bg-white/50 p-5 shadow-sm' }, [
+      const cardEl = el('article', { class: 'card p-5' }, [
         headRow(card, langTag),
         messageBlock(card.message, { expandable: true }),
         ...(card.media ?? []).map(mediaNode).filter(Boolean),

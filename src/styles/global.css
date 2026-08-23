@@ -3,6 +3,7 @@
 @theme {
   /* Warm, restrained memorial palette — tune freely */
   --color-parchment: #f7f3ec;
+  --color-parchment-deep: #efe8db;
   --color-ink: #2b2926;
   --color-gold: #b08d57;
   --color-gold-deep: #8a6a38;   /* contrast-safe accent for small text */
@@ -10,12 +11,93 @@
 
   --font-serif: "Cormorant Garamond", "Noto Serif TC", "Noto Serif SC", Georgia, serif;
   --font-body: "Source Sans 3", "Noto Sans TC", "Noto Sans SC", system-ui, sans-serif;
+
+  --shadow-soft: 0 1px 2px rgb(43 41 38 / 0.05), 0 8px 24px -12px rgb(43 41 38 / 0.18);
+  --shadow-lift: 0 2px 4px rgb(43 41 38 / 0.06), 0 16px 40px -16px rgb(43 41 38 / 0.28);
+
+  --ease-graceful: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 html { scroll-behavior: smooth; }
 
+body {
+  background-color: var(--color-parchment);
+  background-image:
+    radial-gradient(52rem 30rem at 50% -6rem, rgb(176 141 87 / 0.10), transparent 68%),
+    radial-gradient(40rem 26rem at 88% 112%, rgb(138 155 132 / 0.09), transparent 70%);
+  background-repeat: no-repeat;
+}
+
 /* Elegant thin rule used between sections */
 .hairline { border-color: rgb(43 41 38 / 0.12); }
+
+/* ── Shared surfaces & actions ──────────────────────── */
+.card {
+  border-radius: 0.9rem;
+  border: 1px solid;
+  border-color: rgb(43 41 38 / 0.12);
+  background: rgb(255 255 255 / 0.55);
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-primary {
+  display: inline-block;
+  cursor: pointer;
+  border-radius: 9999px;
+  background: var(--color-ink);
+  padding: 0.75rem 2rem;
+  color: var(--color-parchment);
+  box-shadow: var(--shadow-soft);
+  transition: background-color .25s var(--ease-graceful), transform .25s var(--ease-graceful), box-shadow .25s var(--ease-graceful);
+}
+.btn-primary:hover {
+  background: var(--color-gold-deep);
+  box-shadow: var(--shadow-lift);
+}
+.btn-primary:active { transform: translateY(1px); }
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  border-radius: 9999px;
+  border: 1px solid var(--color-gold);
+  padding: 0.5rem 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--color-gold-deep);
+  transition: background-color .2s var(--ease-graceful), color .2s var(--ease-graceful), box-shadow .2s var(--ease-graceful);
+}
+.btn-outline:hover {
+  background: var(--color-gold);
+  color: #fff;
+  box-shadow: var(--shadow-soft);
+}
+
+/* Small-caps kicker used above section titles */
+.kicker {
+  font-size: 0.72rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--color-gold-deep);
+}
+
+/* ── Reveal on scroll ───────────────────────────────── */
+/* Applied only when JS is available (html.js) so content
+   is never hidden from non-JS visitors or crawlers.    */
+html.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity .8s var(--ease-graceful),
+    transform .8s var(--ease-graceful);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+html.js [data-reveal].revealed {
+  opacity: 1;
+  transform: none;
+}
 
 /* ── Accessibility ──────────────────────────────────── */
 :focus-visible {
@@ -29,5 +111,10 @@ html { scroll-behavior: smooth; }
   *, *::before, *::after {
     animation-duration: .01ms !important;
     transition-duration: .01ms !important;
+  }
+  html.js [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }

@@ -3,6 +3,7 @@ import { getEntry } from 'astro:content';
 import { locales, type Locale } from '../../config';
 import { t, pick } from '../../i18n/ui';
 import Base from '../../layouts/Base.astro';
+import SectionHeader from '../../components/SectionHeader.astro';
 
 export function getStaticPaths() {
   return locales.map((locale) => ({ params: { locale } }));
@@ -15,30 +16,43 @@ if (!settings.sections.lifeStory) return Astro.redirect(`/${locale}/`);
 const profile = (await getEntry('profile', 'profile'))!.data;
 const $t = t(locale);
 const bio = pick(profile.biography, locale);
+const initial = pick(profile.name, locale).trim().charAt(0) || '·';
 ---
 <Base title={$t('nav.lifeStory')}>
-  <article class="py-10">
-    <header class="text-center">
-      <h1 class="font-serif text-4xl">{$t('home.biographyTitle')}</h1>
-      <p class="mt-3 font-serif text-lg italic text-ink/60">“{pick(profile.epitaph, locale)}”</p>
-      <div class="mx-auto mt-6 h-px w-16 bg-gold"></div>
-    </header>
+  <article class="py-12">
+    <SectionHeader as="h1" title={$t('home.biographyTitle')} />
 
-    <div class="mx-auto mt-10 max-w-2xl leading-loose text-ink/85 whitespace-pre-line
-                first-letter:float-left first-letter:mr-2 first-letter:font-serif
-                first-letter:text-6xl first-letter:leading-[0.9] first-letter:text-gold">
+    {pick(profile.epitaph, locale) && (
+      <blockquote class="mx-auto mt-9 max-w-xl text-center font-serif text-xl italic leading-relaxed text-ink/70"
+                  data-reveal>
+        “{pick(profile.epitaph, locale)}”
+      </blockquote>
+    )}
+
+    <div class="mx-auto mt-12 max-w-[68ch] leading-loose text-ink/85 whitespace-pre-line
+                first-letter:float-left first-letter:mr-3 first-letter:font-serif
+                first-letter:text-6xl first-letter:leading-[0.85] first-letter:text-gold"
+         data-reveal>
       {bio}
     </div>
 
     {profile.portrait && (
-      <img
-        src={`${import.meta.env.BASE_URL}${profile.portrait}`}
-        alt={pick(profile.name, locale)}
-        width="480" height="480"
-        loading="lazy"
-        class="mx-auto mt-12 w-72 rounded-lg object-cover shadow-md ring-1 ring-black/10"
-        onerror="this.remove()"
-      />
+      <div class="mx-auto mt-14 w-64" data-reveal>
+        <!-- Arch frame echoing the homepage portrait -->
+        <div class="rounded-t-full rounded-b-3xl bg-gradient-to-b from-gold/50 to-gold/20 p-[3px] shadow-[var(--shadow-lift)]">
+          <div class="relative flex h-80 items-center justify-center overflow-hidden rounded-t-full rounded-b-[calc(1.5rem-3px)] bg-parchment-deep">
+            <span class="font-serif text-7xl text-gold/70" aria-hidden="true">{initial}</span>
+            <img
+              src={`${import.meta.env.BASE_URL}${profile.portrait}`}
+              alt={pick(profile.name, locale)}
+              width="256" height="320"
+              loading="lazy"
+              class="absolute inset-0 h-full w-full object-cover"
+              onerror="this.remove()"
+            />
+          </div>
+        </div>
+      </div>
     )}
   </article>
 </Base>

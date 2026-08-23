@@ -3,6 +3,7 @@ import { getCollection, getEntry } from 'astro:content';
 import { locales, type Locale } from '../../config';
 import { t, pick } from '../../i18n/ui';
 import Base from '../../layouts/Base.astro';
+import SectionHeader from '../../components/SectionHeader.astro';
 
 export function getStaticPaths() {
   return locales.map((locale) => ({ params: { locale } }));
@@ -16,18 +17,24 @@ const $t = t(locale);
 const items = (await getCollection('donations')).sort((a, b) => a.data.order - b.data.order);
 ---
 <Base title={$t('nav.donations')}>
-  <section class="py-10">
-    <h1 class="text-center font-serif text-4xl">{$t('nav.donations')}</h1>
-    <p class="mx-auto mt-4 max-w-xl text-center leading-relaxed text-ink/70">{$t('donations.intro')}</p>
+  <section class="py-12">
+    <SectionHeader as="h1" title={$t('nav.donations')} lede={$t('donations.intro')} />
 
-    <div class="mx-auto mt-10 grid max-w-3xl gap-5 sm:grid-cols-2">
-      {items.map(({ data }) => (
-        <article class="flex flex-col rounded-xl border hairline bg-white/50 p-6 shadow-sm">
-          <h2 class="font-serif text-xl">{data.name}</h2>
-          <p class="mt-2 flex-1 text-sm leading-relaxed text-ink/70">{pick(data.blurb, locale)}</p>
+    <div class="mx-auto mt-12 grid max-w-3xl gap-5 sm:grid-cols-2">
+      {items.map(({ data }, i) => (
+        <article class="card flex flex-col p-6 transition-shadow duration-300 hover:shadow-[var(--shadow-lift)]"
+                 data-reveal style={`--reveal-delay:${Math.min(i, 4) * 90}ms`}>
+          <div class="flex items-center gap-3.5">
+            <span class="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gold/10 font-serif text-xl text-gold-deep ring-1 ring-gold/30" aria-hidden="true">
+              {data.name.charAt(0)}
+            </span>
+            <h2 class="font-serif text-xl leading-snug">{data.name}</h2>
+          </div>
+          <p class="mt-3 flex-1 text-sm leading-relaxed text-ink/70">{pick(data.blurb, locale)}</p>
           <a href={data.url} target="_blank" rel="noopener noreferrer"
-             class="mt-5 self-start rounded-full bg-ink px-6 py-2 text-sm text-parchment transition-colors hover:bg-gold-deep">
-            {$t('donations.cta')} ↗
+             class="mt-5 inline-flex cursor-pointer items-center gap-1.5 self-start rounded-full border hairline bg-white/60 px-5 py-2 text-sm font-medium text-gold-deep transition-colors duration-200 hover:border-gold hover:bg-gold hover:text-white">
+            {$t('donations.cta')}
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg>
           </a>
         </article>
       ))}

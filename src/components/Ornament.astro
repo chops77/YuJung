@@ -1,0 +1,16 @@
+---
+interface Props { class?: string }
+const { class: className = '' } = Astro.props;
+---
+
+<!-- Decorative rule · diamond · rule — the site's signature divider -->
+<div class:list={['flex items-center justify-center gap-3', className]} aria-hidden="true">
+  <span class="h-px w-14 bg-gradient-to-r from-transparent to-gold/70 sm:w-20"></span>
+  <span class="relative flex h-2.5 w-2.5 items-center justify-center">
+    <svg viewBox="0 0 10 10" class="h-2.5 w-2.5 text-gold" fill="currentColor">
+      <path d="M5 0L10 5L5 10L0 5Z"></path>
+    </svg>
+    <span class="absolute h-2.5 w-2.5 rotate-45 rounded-full border border-gold/50"></span>
+  </span>
+  <span class="h-px w-14 bg-gradient-to-l from-transparent to-gold/70 sm:w-20"></span>
+</div>
