@@ -245,8 +245,6 @@ collections:
     create: true
     identifier_field: adminTitle
     summary: '{{adminTitle}}{{active}}'
-    media_folder: 'public/media/music'
-    public_folder: 'media/music'
     fields:
       - { label: 'Admin Title (CMS label only)', name: adminTitle, widget: string }
       - { label: 'Track title', name: title, widget: string }

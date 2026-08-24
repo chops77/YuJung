@@ -1,6 +1,6 @@
 # Music files are committed to git via Decap CMS, not Firebase Storage
 
-The project already uses Firebase for guest features, so a future reader might expect uploaded media to live in Firebase Storage. It cannot: Storage requires the paid Blaze plan (`src/lib/firebase.ts` notes this), and every piece of curated content here flows through Decap CMS → git → GitHub Pages. We therefore added a `music` CMS collection whose audio uploads commit to `public/media/music/` and deploy as static assets with the site.
+The project already uses Firebase for guest features, so a future reader might expect uploaded media to live in Firebase Storage. It cannot: Storage requires the paid Blaze plan (`src/lib/firebase.ts` notes this), and every piece of curated content here flows through Decap CMS → git → GitHub Pages. We therefore added a `music` CMS collection whose audio uploads use the shared `public/media/uploads/` library, commit to git, and deploy as static assets with the site.
 
 ## Considered Options
 
