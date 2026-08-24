@@ -4,7 +4,7 @@ siteTitle:
   zh_cn: 永远怀念　曹玉蓉
 sections:
   lifeStory: true
-  timeline: true
+  timeline: false
   gallery: true
   memories: true
   service: true
