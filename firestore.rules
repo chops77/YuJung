@@ -72,7 +72,7 @@ service cloud.firestore {
       allow update: if request.auth != null && request.auth.uid == uid
         && request.resource.data.keys().hasOnly(['lastLitAt'])
         && request.resource.data.lastLitAt == request.time
-        && request.time >= resource.data.lastLitAt + duration.value(60, 'seconds');
+        && request.time >= resource.data.lastLitAt + duration.value(60, 's');
       allow delete: if false;
     }
 
