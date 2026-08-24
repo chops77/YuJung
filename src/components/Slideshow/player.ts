@@ -90,37 +90,84 @@ export function init(): void {
   pauseBtn.addEventListener('click', () => setPaused(!paused));
 
   window.addEventListener('keydown', (e) => {
-    if (!paused) return;
     const target = e.target as HTMLElement | null;
     if (target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) return;
+    if (e.key === 'Escape' && pseudoFs) { exitPseudo(); return; }
+    if (!paused) return;
     if (e.key === 'ArrowLeft') { e.preventDefault(); step(-1); }
     if (e.key === 'ArrowRight') { e.preventDefault(); step(1); }
   });
 
   /* ---------- fullscreen ---------- */
 
+  // iPhone Safari/Chrome (WebKit) only supports the Fullscreen API on <video>;
+  // fall back to a fixed-position CSS overlay everywhere else it's missing.
+  const fsStage = stage as HTMLDivElement & {
+    webkitRequestFullscreen?: () => Promise<void> | void;
+  };
+  const fsDoc = document as Document & {
+    webkitFullscreenElement?: Element | null;
+    webkitExitFullscreen?: () => Promise<void> | void;
+  };
+
+  const hasNativeFs =
+    typeof stage.requestFullscreen === 'function' ||
+    typeof fsStage.webkitRequestFullscreen === 'function';
+
+  function nativeActive(): boolean {
+    return document.fullscreenElement != null || fsDoc.webkitFullscreenElement != null;
+  }
+
+  let pseudoFs = false;
+
   function syncFsUi(isFs: boolean): void {
     stage.classList.toggle('is-fs', isFs);
     stage.classList.remove('controls-idle');
+    window.clearTimeout(idleTimer);
     fsBtn.querySelector('.icon-fs-on')?.classList.toggle('hidden', isFs);
     fsBtn.querySelector('.icon-fs-off')?.classList.toggle('hidden', !isFs);
     fsBtn.setAttribute('aria-label', isFs ? i18n.exitFullscreen : i18n.fullscreen);
     fsBtn.title = isFs ? i18n.exitFullscreen : i18n.fullscreen;
   }
 
+  function enterPseudo(): void {
+    pseudoFs = true;
+    document.body.style.overflow = 'hidden'; // lock page scroll behind the overlay
+    stage.classList.add('is-pseudo-fs');
+    syncFsUi(true);
+  }
+
+  function exitPseudo(): void {
+    pseudoFs = false;
+    document.body.style.overflow = '';
+    stage.classList.remove('is-pseudo-fs');
+    syncFsUi(false);
+  }
+
   fsBtn.addEventListener('click', () => {
-    if (document.fullscreenElement) {
-      void document.exitFullscreen();
-    } else {
-      void stage.requestFullscreen();
+    if (nativeActive() || pseudoFs) {
+      if (pseudoFs) exitPseudo();
+      else if (typeof document.exitFullscreen === 'function') void document.exitFullscreen();
+      else fsDoc.webkitExitFullscreen?.();
+      return;
     }
+    if (!hasNativeFs) {
+      enterPseudo();
+      return;
+    }
+    const req =
+      typeof stage.requestFullscreen === 'function'
+        ? stage.requestFullscreen()
+        : fsStage.webkitRequestFullscreen?.();
+    req?.catch(() => enterPseudo()); // denied → degrade gracefully
   });
-  document.addEventListener('fullscreenchange', () =>
-    syncFsUi(document.fullscreenElement === stage),
-  );
+
+  const onFsChange = () => syncFsUi(nativeActive());
+  document.addEventListener('fullscreenchange', onFsChange);
+  document.addEventListener('webkitfullscreenchange', onFsChange);
 
   let idleTimer: number | undefined;
-  stage.addEventListener('mousemove', () => {
+  stage.addEventListener('pointermove', () => {
     if (!stage.classList.contains('is-fs')) return;
     stage.classList.remove('controls-idle');
     window.clearTimeout(idleTimer);
