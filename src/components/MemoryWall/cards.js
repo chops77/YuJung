@@ -14,18 +14,19 @@ export function showDialog(src) {
   dlg.showModal();
 }
 
-export function mediaNode(item) {
-  if (item.type === 'video') {
-    const src = youTubeEmbedUrl(item.url);
-    if (!src) return null;
-    return el('div', { class: 'mt-3 overflow-hidden rounded-lg aspect-video' },
-      [el('iframe', { src, loading: 'lazy', title: 'video', allowfullscreen: '',
-        class: 'h-full w-full', allow: 'encrypted-media; picture-in-picture' })]);
-  }
-  const img = el('img', { src: item.url, alt: '', loading: 'lazy',
+export function photoNode(photo) {
+  const img = el('img', { src: photo.url, alt: '', loading: 'lazy',
     class: 'w-full cursor-zoom-in rounded-lg object-cover' });
   img.addEventListener('click', () => showDialog(img.src));
   return el('div', { class: 'mt-3' }, [img]);
+}
+
+export function videoNode(url) {
+  const src = youTubeEmbedUrl(url);
+  if (!src) return null;
+  return el('div', { class: 'mt-3 overflow-hidden rounded-lg aspect-video' },
+    [el('iframe', { src, loading: 'lazy', title: 'video', allowfullscreen: '',
+      class: 'h-full w-full', allow: 'encrypted-media; picture-in-picture' })]);
 }
 
 export function headRow(card, langTag) {

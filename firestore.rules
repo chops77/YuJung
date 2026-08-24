@@ -7,6 +7,20 @@ service cloud.firestore {
         exists(/databases/$(db)/documents/admins/$(request.auth.uid));
     }
 
+    function validPhoto(photo) {
+      return photo == null || (
+        photo is map
+        && photo.keys().hasOnly(['url', 'publicId'])
+        && photo.url is string
+        && photo.url.size() <= 1000
+        && photo.url.matches('https://res\\.cloudinary\\.com/[^/]+/image/upload/[^?]*memory-wall/[^?]+\\.webp')
+        && photo.publicId is string
+        && photo.publicId.size() > 0
+        && photo.publicId.size() <= 255
+        && photo.publicId.matches('memory-wall/.+')
+      );
+    }
+
     match /memories/{card} {
       // "Rules are not filters": a LIST query is denied unless its own
       // constraints guarantee compliance — so admins get unrestricted read
@@ -14,12 +28,22 @@ service cloud.firestore {
       // non-hidden cards (the wall query filters hidden == false).
       allow read: if isAdmin() || resource.data.hidden != true;
       allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly([
+          'authorName', 'relation', 'message', 'photo', 'videoUrl', 'hidden', 'createdAt'
+        ])
         && request.resource.data.authorName is string
         && request.resource.data.authorName.size() > 0
         && request.resource.data.authorName.size() <= 60
         && request.resource.data.message is string
         && request.resource.data.message.size() >= 1
         && request.resource.data.message.size() <= 2000
+        && request.resource.data.relation is string
+        && request.resource.data.relation.size() <= 60
+        && validPhoto(request.resource.data.photo)
+        && request.resource.data.videoUrl is string
+        && request.resource.data.videoUrl.size() <= 500
+        && (request.resource.data.videoUrl == ''
+          || request.resource.data.videoUrl.matches('https://(www\\.)?(youtube\\.com/(watch\\?v=|shorts/)|youtu\\.be/)[A-Za-z0-9_-]{11}.*'))
         && request.resource.data.hidden == false
         && request.resource.data.createdAt == request.time;
       allow update, delete: if isAdmin();

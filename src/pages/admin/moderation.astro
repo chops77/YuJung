@@ -5,7 +5,6 @@ const fb = JSON.stringify({
   apiKey: import.meta.env.PUBLIC_FIREBASE_API_KEY ?? '',
   authDomain: import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN ?? '',
   projectId: import.meta.env.PUBLIC_FIREBASE_PROJECT_ID ?? '',
-  storageBucket: import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET ?? '',
   appId: import.meta.env.PUBLIC_FIREBASE_APP_ID ?? '',
   recaptchaSiteKey: import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY ?? '',
 });
@@ -54,9 +53,9 @@ const fb = JSON.stringify({
 
 <script type="application/json" id="fb-config" set:html={fb} />
 <script type="module" is:inline>
-  const { apiKey, authDomain, projectId, storageBucket, appId, recaptchaSiteKey }
+  const { apiKey, authDomain, projectId, appId, recaptchaSiteKey }
     = JSON.parse(document.getElementById('fb-config').textContent);
-  const firebaseConfig = { apiKey, authDomain, projectId, storageBucket, appId };
+  const firebaseConfig = { apiKey, authDomain, projectId, appId };
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js';
   import { initializeAppCheck, ReCaptchaV3Provider } from 'https://www.gstatic.com/firebasejs/11.1.0/firebase-app-check.js';
   import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut }
@@ -117,9 +116,10 @@ const fb = JSON.stringify({
         <strong>${esc(c.authorName)}</strong>${c.relation ? ' · ' + esc(c.relation) : ''}
         <span class="muted">· ${c.createdAt?.toDate?.().toLocaleString() ?? ''}</span>
         <p style="white-space:pre-line;margin:8px 0">${esc(c.message)}</p>
-        ${(c.media ?? []).map(m => m.type === 'image'
-          ? `<a href="${esc(m.url)}" target="_blank"><img class="guest" src="${esc(m.url)}"></a>`
-          : `<p class="muted">🎬 <a href="${esc(m.url)}" target="_blank">${esc(m.url)}</a></p>`).join('')}
+        ${c.photo ? `<a href="${esc(c.photo.url)}" target="_blank" rel="noopener"><img class="guest" src="${esc(c.photo.url)}"></a>
+          <p class="muted">Cloudinary: <code>${esc(c.photo.publicId)}</code>
+          <button type="button" data-act="copy-photo">Copy ID</button></p>` : ''}
+        ${c.videoUrl ? `<p class="muted">Video: <a href="${esc(c.videoUrl)}" target="_blank" rel="noopener">${esc(c.videoUrl)}</a></p>` : ''}
         <div class="bar">
           <button class="${c.hidden ? '' : 'warn'}" data-act="toggle">${c.hidden ? 'Unhide' : 'Hide'}</button>
           <button data-act="edit">Edit message</button>
@@ -128,6 +128,8 @@ const fb = JSON.stringify({
         <details><summary class="muted">Comments</summary><div class="cmts muted">Loading…</div></details>`;
 
       const [toggleBtn, editBtn, delBtn] = art.querySelectorAll('div.bar button');
+      const copyPhotoBtn = art.querySelector('[data-act="copy-photo"]');
+      if (copyPhotoBtn) copyPhotoBtn.onclick = () => navigator.clipboard.writeText(c.photo.publicId);
       toggleBtn.onclick = () => updateDoc(doc(db, 'memories', c.id), { hidden: !c.hidden })
         .then(loadCards).catch(alert);
       editBtn.onclick = () => {
@@ -135,7 +137,8 @@ const fb = JSON.stringify({
         updateDoc(doc(db, 'memories', c.id), { message: v.trim() }).then(loadCards).catch(alert);
       };
       delBtn.onclick = async () => {
-        if (!confirm('Permanently delete this memory and its comments?')) return;
+        const photoNote = c.photo ? `\n\nIts Cloudinary photo will remain. Delete it separately if desired.\nCloudinary ID: ${c.photo.publicId}` : '';
+        if (!confirm('Permanently delete this memory and its comments?' + photoNote)) return;
         const cs = await getDocs(collection(db, 'memories', c.id, 'comments'));
         await Promise.all(cs.docs.map(x => deleteDoc(x.ref)));
         await deleteDoc(doc(db, 'memories', c.id));

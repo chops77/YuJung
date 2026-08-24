@@ -14,8 +14,8 @@ every piece of content translatable per language.
 
 ## Features
 
-- 🕯 **Memory wall** — guests post cards (name, relationship, message) with no accounts,
-  attach photos (auto-compressed client-side) or YouTube links, and reply in comment threads
+- 🕯 **Memory wall** — guests post cards (name, relationship, message) with no visible account,
+  upload one photo or attach a YouTube link, and reply in comment threads
 - 🛡 **Layered spam protection** — App Check (reCAPTCHA v3), honeypot field, cooldown,
   and length caps, without showing a CAPTCHA to grieving visitors
 - 🔐 **Post-hoc moderation** — family members sign in with email/password to hide,
@@ -24,12 +24,12 @@ every piece of content translatable per language.
 - ✍️ **Git-based CMS** (Decap) — edit everything through browser forms; saves commit
   straight to the repo and trigger an automatic rebuild
 - 🌏 **Trilingual** — route-based i18n with localized dates, relative times, and content fields
-- ⚡ **Fast & free to host** — static Astro output on GitHub Pages; videos stream via
-  click-to-play YouTube facades; Firebase free tier covers all guest content
+- ⚡ **Fast & free to host** — static Astro output on GitHub Pages, Firestore for guest
+  content, and Cloudinary's free tier for uploaded photos
 
 ## Stack
 
-Astro 5 · Tailwind CSS 4 · Decap CMS · Firebase (Firestore, Storage, Auth, App Check) ·
+Astro 5 · Tailwind CSS 4 · Decap CMS · Firebase (Firestore, Auth, App Check) · Cloudinary ·
 GitHub Actions → GitHub Pages
 
 ## Requirements
@@ -37,6 +37,7 @@ GitHub Actions → GitHub Pages
 - Node.js **18.17+** (Node 20 LTS recommended)
 - A GitHub account (Pages + OAuth app)
 - A Firebase project (free Spark plan is sufficient)
+- A Cloudinary account (the free plan is sufficient for small memorial sites)
 
 ## Local development
 
@@ -46,13 +47,13 @@ cp .env.example .env      # fill from your Firebase web-app config
 npm run dev               # http://localhost:4321 → redirects to /zh-tw/
 ```
 
-Everything except the memory wall works immediately against the sample content.
-To bring the wall/candle/moderation alive, complete the Firebase steps in
-[`docs/LAUNCH-CHECKLIST.md`](docs/LAUNCH-CHECKLIST.md) (sections B–C), restart the dev
+Everything except the Memory Wall works immediately against the sample content.
+To bring the wall, Guest Photo upload, candle, and moderation features alive, complete
+the Firebase and Cloudinary steps in [`docs/LAUNCH-CHECKLIST.md`](docs/LAUNCH-CHECKLIST.md), restart the dev
 server, then:
 
 - Post test memories at `/zh-tw/memories/`
-- Moderate them at `/admin/moderation.html` (email/password sign-in)
+- Moderate them at `/admin/moderation` (email/password sign-in)
 
 ### Production build check
 
@@ -94,11 +95,11 @@ served under `/<repo>/`.
 
 ## Moderation & permissions
 
-- **Guests**: anonymous sessions only; can create memories/comments and upload images
-  ≤ 6 MB into `guest-media/` (create-only — uploads are immutable)
+- **Guests**: anonymous Firebase sessions only; can create memories/comments and upload one
+  Guest Photo per Memory through a constrained unsigned Cloudinary preset
 - **Admins**: Email/Password accounts whose UID exists as a document in the Firestore
   `admins` collection; may update/delete anything, enforced by `firestore.rules`
-- Panel: `/admin/moderation.html` — filter, hide/unhide, edit messages,
+- Panel: `/admin/moderation` — filter, hide/unhide, edit messages, copy Cloudinary photo IDs,
   delete cards (cascades comments) and individual comments
 
 ## Deployment
@@ -106,12 +107,13 @@ served under `/<repo>/`.
 Full walkthrough: [`docs/LAUNCH-CHECKLIST.md`](docs/LAUNCH-CHECKLIST.md). Short version:
 
 1. Push to GitHub; Settings → Pages → Source: **GitHub Actions**
-2. Create the Firebase project; enable Anonymous + Email auth; publish `firestore.rules`
-   and `storage.rules`; register App Check (reCAPTCHA v3); add admin UIDs
-3. Set repo Variables: `PUBLIC_FIREBASE_*`, `PUBLIC_RECAPTCHA_SITE_KEY`
-4. Create a GitHub **OAuth App** (callback `https://<user>.github.io/yujung/admin/`)
+2. Create the Firebase project; enable Anonymous + Email auth; publish `firestore.rules`;
+   register App Check (reCAPTCHA v3); add admin UIDs
+3. Create the Cloudinary unsigned upload preset described in the launch checklist
+4. Set repo Variables: `PUBLIC_FIREBASE_*`, `PUBLIC_RECAPTCHA_SITE_KEY`,
+   `PUBLIC_CLOUDINARY_CLOUD_NAME`, and `PUBLIC_CLOUDINARY_UPLOAD_PRESET`
+5. Create a GitHub **OAuth App** (callback `https://<user>.github.io/yujung/admin/`)
    and put its Client ID in `public/admin/config.yml`
-5. Paste the same Firebase config into `public/admin/moderation.html`
 6. Fill content via `/admin/` — every save rebuilds the site automatically
 
 ## Using YuJung for another loved one
@@ -122,7 +124,7 @@ Full walkthrough: [`docs/LAUNCH-CHECKLIST.md`](docs/LAUNCH-CHECKLIST.md). Short 
    - `astro.config.mjs` → `site` and `base: '/<new-repo>'`
    - `public/admin/config.yml` → `site_url`, `display_url`, `backend.repo`
    - Your OAuth App callback URL → `https://<user>.github.io/<new-repo>/admin/`
-4. Paste a fresh (or shared) Firebase config into `moderation.html`, add admins
+4. Set a fresh (or shared) Firebase config through environment variables and add admins
 5. Edit everything through `/admin/`
 
 > Tip: keep this upstream repo as `yujung`; give each deployed instance its own
@@ -130,17 +132,16 @@ Full walkthrough: [`docs/LAUNCH-CHECKLIST.md`](docs/LAUNCH-CHECKLIST.md). Short 
 
 ## Security model
 
-Firebase web credentials are public by design — data safety lives in rules:
-guests get create-only writes with size/type caps; only UIDs listed in `admins`
-may modify or delete; App Check ties requests to your domains. No secrets ship
-to the client beyond standard web config.
+Firebase web credentials and the Cloudinary cloud/preset names are public by design.
+Firestore rules constrain guest writes; only UIDs listed in `admins` may modify or delete.
+The unsigned Cloudinary preset enforces photo format, size, dimensions, and normalization.
+No Firebase or Cloudinary secret ships to the client.
 
 ## Project structure
 
 ```
 ├── astro.config.mjs            # site/base/i18n config
 ├── firestore.rules             # guest + admin access model
-├── storage.rules               # guest upload caps, admin access
 ├── docs/LAUNCH-CHECKLIST.md    # step-by-step launch walkthrough
 ├── scripts/seed.mjs            # reset content for reuse
 ├── public/
@@ -148,8 +149,7 @@ to the client beyond standard web config.
 │   ├── media/                  # photos (uploads land in media/uploads/)
 │   └── admin/
 │       ├── index.html          # Decap CMS entry
-│       ├── config.yml          # CMS collections
-│       └── moderation.html     # family moderation panel
+│       └── config.yml          # CMS collections
 └── src/
     ├── config.ts               # locales, defaults
     ├── content.config.ts       # zod schemas
@@ -157,7 +157,7 @@ to the client beyond standard web config.
     ├── layouts/Base.astro      # nav-from-toggles, SEO/hreflang/OG
     ├── components/             # Hero, switcher, MemoryWall islands
     ├── lib/firebase.ts         # init + guest/admin data helpers
-    ├── pages/                  # root redirect, [locale]/* , 404
+    ├── pages/                  # root redirect, [locale]/*, moderation, 404
     └── content/                # settings, profile, timeline, …
 ```
 

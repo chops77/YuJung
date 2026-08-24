@@ -1,0 +1,3 @@
+# Cloudinary for Guest Photos
+
+Guest Photos use Cloudinary unsigned browser uploads rather than Firebase Storage or a personal Google Drive. Firebase Storage now requires billing, while Drive requires OAuth-backed server authority and is not designed as a public image CDN; Cloudinary provides constrained image uploads, HEIC normalization, and CDN delivery within a suitable free tier. The public preset is deliberately limited to still images, 12 MB source files, 2000×2000 WebP output, and stripped metadata; orphaned uploads and manual asset deletion are accepted trade-offs because this static site has no trusted upload backend.

@@ -7,13 +7,12 @@ import { getFirestore, collection, doc, addDoc, getDoc, getDocs,
          type DocumentData, type DocumentReference } from 'firebase/firestore';
 import { initializeAppCheck, ReCaptchaV3Provider, type AppCheck } from 'firebase/app-check';
 
-// Public by design — security lives in firestore.rules / storage.rules + App Check.
+// Public by design — security lives in Firestore rules and App Check.
 // Values come from .env locally and GitHub repo Variables in CI.
 const firebaseConfig = {
   apiKey:      import.meta.env.PUBLIC_FIREBASE_API_KEY,
   authDomain:  import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN,
   projectId:   import.meta.env.PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET,
   appId:       import.meta.env.PUBLIC_FIREBASE_APP_ID,
 };
 
@@ -45,14 +44,16 @@ export async function ensureGuest(): Promise<User> {
 
 export interface MemoryInput {
   authorName: string; relation?: string; message: string;
-  media?: { type: 'image' | 'video'; url: string }[];
+  photo?: { url: string; publicId: string };
+  videoUrl?: string;
 }
 
 export async function addMemory(input: MemoryInput) {
   await ensureGuest();
   return addDoc(collection(db, 'memories'), {
     ...input,
-    media: input.media ?? [],
+    photo: input.photo ?? null,
+    videoUrl: input.videoUrl ?? '',
     relation: input.relation ?? '',
     hidden: false,
     createdAt: serverTimestamp(),
@@ -68,7 +69,8 @@ export async function addComment(cardId: string, input: { authorName: string; te
 
 export interface CardView extends DocumentData {
   id: string; authorName: string; relation?: string; message: string;
-  media?: { type: 'image' | 'video'; url: string }[];
+  photo?: { url: string; publicId: string } | null;
+  videoUrl?: string;
   createdAt?: any;
 }
 
@@ -89,7 +91,6 @@ export async function fetchComments(cardId: string) {
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
-/** Guest photos are linked by URL — Firebase Storage needs a paid plan. */
 export function parseYouTubeId(url: string): string | null {
   const m = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([\w-]{11})/);
   return m ? m[1] : null;

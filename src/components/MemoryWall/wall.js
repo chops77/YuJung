@@ -1,6 +1,6 @@
 import { el, relTime } from './dom';
 import { subscribeMemories, fetchComments, addComment } from '../../lib/firebase';
-import { headRow, mediaNode, messageBlock } from './cards';
+import { headRow, photoNode, videoNode, messageBlock } from './cards';
 
 const STR = JSON.parse(document.getElementById('wall-i18n').textContent);
 
@@ -93,7 +93,8 @@ export function initWall(langTag) {
       const cardEl = el('article', { class: 'card p-5' }, [
         headRow(card, langTag),
         messageBlock(card.message, { expandable: true }),
-        ...(card.media ?? []).map(mediaNode).filter(Boolean),
+        card.photo ? photoNode(card.photo) : null,
+        card.videoUrl ? videoNode(card.videoUrl) : null,
         commentSection(card),
       ]);
       root.append(cardEl);

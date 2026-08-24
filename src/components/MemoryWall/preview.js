@@ -1,6 +1,6 @@
 import { el } from './dom';
 import { subscribeMemories } from '../../lib/firebase';
-import { headRow, mediaNode, messageBlock } from './cards';
+import { headRow, photoNode, videoNode, messageBlock } from './cards';
 
 /**
  * Read-only preview of the latest memories for the homepage.
@@ -23,7 +23,7 @@ export function initPreview(strings, max = 3) {
       root.append(el('article', { class: 'card p-5' }, [
         headRow(card, strings.langTag),
         messageBlock(card.message),                       // CSS-clamped, no expand
-        ...(card.media ?? []).slice(0, 1).map(mediaNode).filter(Boolean), // keep it compact
+        card.photo ? photoNode(card.photo) : (card.videoUrl ? videoNode(card.videoUrl) : null),
       ]));
     }
   }, err => {
