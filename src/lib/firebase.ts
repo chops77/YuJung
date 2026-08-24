@@ -106,7 +106,7 @@ export function subscribeCandle(cb: (count: number) => void) {
 /** Milliseconds until this visitor may light again (0 = right now). */
 export async function candleCooldown(): Promise<number> {
   const user = await ensureGuest();
-  const snap = await getDoc(doc(db, 'candles', 'lit', user.uid));
+  const snap = await getDoc(doc(db, 'candles', 'counter', 'lit', user.uid));
   const last = snap.data()?.lastLitAt?.toMillis?.() ?? 0;
   return Math.max(0, CANDLE_COOLDOWN_MS - (Date.now() - last));
 }
@@ -119,7 +119,7 @@ class CandleCooldownError extends Error {
 export async function lightCandle(): Promise<{ ok: boolean; remainingMs: number }> {
   const user = await ensureGuest();
   const counterRef = doc(db, 'candles', 'counter');
-  const litRef = doc(db, 'candles', 'lit', user.uid);
+  const litRef = doc(db, 'candles', 'counter', 'lit', user.uid);
   try {
     await runTransaction(db, async tx => {
       // tx.get() may throw on non-existent documents (first-ever candle);

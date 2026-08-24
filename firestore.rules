@@ -40,12 +40,12 @@ service cloud.firestore {
        per minute. Enforcement lives here, not in the client:
          • counter may only ever go up by exactly 1 (admins exempt);
          • each increment MUST be paired, in the same transaction, with a
-           fresh stamp of candles/lit/{uid} whose lastLitAt == request.time
-           (the client writes serverTimestamp(), so this holds);
+           fresh stamp of candles/counter/lit/{uid} whose lastLitAt ==
+           request.time (the client writes serverTimestamp(), so this holds);
          • lit/{uid} itself accepts a stamp only once per cooldown window. */
     function candleStampedThisWrite() {
       return request.auth != null &&
-        getAfter(/databases/$(db)/documents/candles/lit/$(request.auth.uid))
+        getAfter(/databases/$(db)/documents/candles/counter/lit/$(request.auth.uid))
           .data.lastLitAt == request.time;
     }
 
@@ -63,7 +63,7 @@ service cloud.firestore {
             && candleStampedThisWrite());
     }
 
-    match /candles/lit/{uid} {
+    match /candles/counter/lit/{uid} {
       allow read: if request.auth != null && request.auth.uid == uid;
       allow create: if request.auth != null && request.auth.uid == uid
         && request.resource.data.keys().hasOnly(['lastLitAt'])
