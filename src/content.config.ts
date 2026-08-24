@@ -9,11 +9,16 @@ const settings = defineCollection({
       lifeStory: z.boolean(), timeline: z.boolean(),
       gallery: z.boolean(), memories: z.boolean(),
       service: z.boolean(), donations: z.boolean(),
+      slideshow: z.boolean(),
     }).default({ lifeStory: true, timeline: true, gallery: true,
-                 memories: true, service: true, donations: false }),
+                 memories: true, service: true, donations: false,
+                 slideshow: true }),
     contactEmail: z.string().optional(),
     footerNote: z.record(z.string()).optional(),
-  }),
+    slideshow: z.object({
+      intervalSeconds: z.number().int().min(1).max(30).default(5),
+    }).default({ intervalSeconds: 5 }),
+  })
 });
 
 const profile = defineCollection({
@@ -73,4 +78,15 @@ const donations = defineCollection({
   }),
 });
 
-export const collections = { settings, profile, timeline, photos, videos, service, donations };
+const music = defineCollection({
+  loader: glob({ pattern: '**/*.yaml', base: './src/content/music' }),
+  schema: z.object({
+    title: z.string(),
+    artist: z.string().optional(),
+    file: z.string(),
+    active: z.boolean().default(true),
+    order: z.number().default(0),
+  }),
+});
+
+export const collections = { settings, profile, timeline, photos, videos, service, donations, music };

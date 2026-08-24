@@ -54,6 +54,7 @@ collections:
               - { label: 'Service Details — switch off after services conclude',
                   name: service, widget: boolean, default: true }
               - { label: 'Donations',   name: donations, widget: boolean, default: false }
+              - { label: 'Slideshow (homepage photo band)', name: slideshow, widget: boolean, default: true }
           - { label: 'Contact Email', name: contactEmail, widget: string, required: false }
           - label: 'Footer Note'
             name: footerNote
@@ -63,6 +64,13 @@ collections:
               - { label: 'English',  name: en,    widget: string, required: false }
               - { label: '繁體中文',  name: zh_tw, widget: string, required: false }
               - { label: '简体中文',  name: zh_cn, widget: string, required: false }
+          - label: 'Slideshow'
+            name: slideshow
+            widget: object
+            required: false
+            fields:
+              - { label: 'Seconds per photo (1–30)', name: intervalSeconds,
+                  widget: number, value_type: 'int', min: 1, max: 30, default: 5 }
 
       # ---------- MEMORIAL PROFILE ----------
       - name: profile
@@ -228,3 +236,24 @@ collections:
           - { label: '繁體中文',  name: zh_tw, widget: text, required: false }
           - { label: '简体中文',  name: zh_cn, widget: text, required: false }
       - { label: 'Sort order', name: order, widget: number, default: 0, value_type: 'int', min: 0 }
+
+  - name: music
+    label: '🎵 Music'
+    folder: 'src/content/music'
+    format: yaml
+    extension: yaml
+    create: true
+    identifier_field: adminTitle
+    summary: '{{adminTitle}}{{active}}'
+    media_folder: 'public/media/music'
+    public_folder: 'media/music'
+    fields:
+      - { label: 'Admin Title (CMS label only)', name: adminTitle, widget: string }
+      - { label: 'Track title', name: title, widget: string }
+      - { label: 'Artist (optional)', name: artist, widget: string, required: false }
+      - { label: 'Audio file', name: file, widget: file,
+          hint: 'mp3 / m4a / ogg — keep each track under ~8 MB' }
+      - { label: 'Active (include in slideshow playlist)', name: active,
+          widget: boolean, default: true }
+      - { label: 'Play order (smaller = earlier)', name: order, widget: number,
+          default: 0, value_type: 'int', min: 0 }

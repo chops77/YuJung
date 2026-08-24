@@ -9,6 +9,9 @@ sections:
   memories: true
   service: true
   donations: false
+  slideshow: true
+slideshow:
+  intervalSeconds: 5
 contactEmail: familychao888@gmail.com
 footerNote:
   en: This site is maintained by her family.

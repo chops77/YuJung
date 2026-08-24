@@ -6,6 +6,7 @@ import { t, pick, formatDate } from '../../i18n/ui';
 import Base from '../../layouts/Base.astro';
 import Hero from '../../components/Hero.astro';
 import SectionHeader from '../../components/SectionHeader.astro';
+import Slideshow from '../../components/Slideshow.astro';
 
 export function getStaticPaths() {
   return locales.map((locale) => ({ params: { locale } }));
@@ -26,6 +27,19 @@ const timelineItems = timelineOn
 
 const serviceOn = settings.sections.service;
 const service = serviceOn ? (await getEntry('service', 'service'))?.data : undefined;
+
+const slideshowOn = settings.sections.slideshow;
+const slideshowPhotos = slideshowOn
+  ? (await getCollection('photos'))
+      .sort((a, b) => a.data.order - b.data.order)
+      .map(({ data }) => ({ image: data.image, alt: pick(data.alt, locale) }))
+  : [];
+const slideshowTracks = slideshowOn
+  ? (await getCollection('music'))
+      .filter(({ data }) => data.active)
+      .sort((a, b) => a.data.order - b.data.order)
+      .map(({ data }) => ({ file: data.file, title: data.title }))
+  : [];
 
 const bioText = pick(profile.biography, locale);
 const bioExcerpt = bioText.length > 320 ? bioText.slice(0, 320).trimEnd() + '…' : bioText;
@@ -65,6 +79,15 @@ const bioExcerpt = bioText.length > 320 ? bioText.slice(0, 320).trimEnd() + '…
         ))}
       </ol>
     </section>
+  )}
+
+  {slideshowPhotos.length > 0 && (
+    <Slideshow
+      locale={locale}
+      photos={slideshowPhotos}
+      tracks={slideshowTracks}
+      intervalSeconds={settings.slideshow.intervalSeconds}
+    />
   )}
 
   {settings.sections.memories && (
