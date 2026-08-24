@@ -74,7 +74,7 @@ const playlist = tracks.map(({ file, title }) => ({ src: `${base}${file}`, title
     inset: 0;
     height: 100%;
     width: 100%;
-    object-fit: cover;
+    object-fit: contain;
     opacity: 0;
     transition: opacity 1s ease;
   }
@@ -97,9 +97,8 @@ const playlist = tracks.map(({ file, title }) => ({ src: `${base}${file}`, title
   }
   .ctrl-btn:hover { background: var(--color-gold-deep, #a8842c); }
 
-  /* Fullscreen (native or pseudo): contain, no cropping, auto-hiding controls */
+  /* Fullscreen (native or pseudo): no cropping, auto-hiding controls */
   #slideshow-stage.is-fs { border-radius: 0; }
-  #slideshow-stage.is-fs .slide-layer { object-fit: contain; }
   #slideshow-stage.is-fs .slideshow-controls { transition: opacity 0.3s ease; }
   #slideshow-stage.is-fs.controls-idle .slideshow-controls { opacity: 0; pointer-events: none; }
 
