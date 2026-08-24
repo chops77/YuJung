@@ -210,6 +210,8 @@ export function init(): void {
   function swapMusicIcon(on: boolean): void {
     musicBtn?.querySelector('.icon-play')?.classList.toggle('hidden', on);
     musicBtn?.querySelector('.icon-stop')?.classList.toggle('hidden', !on);
+    const label = musicBtn?.querySelector('.music-label');
+    if (label) label.textContent = on ? i18n.stopMusic : i18n.playMusic;
     musicBtn?.setAttribute('aria-label', on ? i18n.stopMusic : i18n.playMusic);
     if (musicBtn) musicBtn.title = on ? i18n.stopMusic : i18n.playMusic;
   }
