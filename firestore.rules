@@ -65,11 +65,14 @@ service cloud.firestore {
 
     match /candles/lit/{uid} {
       allow read: if request.auth != null && request.auth.uid == uid;
-      allow create, update: if request.auth != null && request.auth.uid == uid
+      allow create: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['lastLitAt'])
+        && request.resource.data.lastLitAt == request.time;
+      // Later stamps must wait out the cooldown window.
+      allow update: if request.auth != null && request.auth.uid == uid
         && request.resource.data.keys().hasOnly(['lastLitAt'])
         && request.resource.data.lastLitAt == request.time
-        && (!exists(resource)
-            || request.time >= resource.data.lastLitAt + duration.value(60, 's'));
+        && request.time >= resource.data.lastLitAt + duration.value(60, 'seconds');
       allow delete: if false;
     }
 

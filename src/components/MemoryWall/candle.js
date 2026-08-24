@@ -44,9 +44,10 @@ export function initCandle(labelLight, templateLit, templateWait) {
     let res;
     try {
       res = await lightCandle();
-    } catch {
+    } catch (e) {
       // e.g. server rejected a too-fast write due to clock skew —
       // re-derive remaining time instead of surfacing an error.
+      console.error('light candle failed:', e);
       res = { ok: false, remainingMs: await candleCooldown().catch(() => 5000) };
     }
     if (res.ok) {
