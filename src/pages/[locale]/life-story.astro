@@ -38,9 +38,9 @@ const initial = pick(profile.name, locale).trim().charAt(0) || '·';
 
     {profile.portrait && (
       <div class="mx-auto mt-14 w-64" data-reveal>
-        <!-- Arch frame echoing the homepage portrait -->
-        <div class="rounded-t-full rounded-b-3xl bg-gradient-to-b from-gold/50 to-gold/20 p-[3px] shadow-[var(--shadow-lift)]">
-          <div class="relative flex h-80 items-center justify-center overflow-hidden rounded-t-full rounded-b-[calc(1.5rem-3px)] bg-parchment-deep">
+        <!-- Oval cameo matching the homepage portrait. -->
+        <div class="aspect-[4/5] rounded-[50%] bg-gradient-to-b from-gold/50 to-gold/20 p-[3px] shadow-[var(--shadow-soft)]">
+          <div class="relative flex h-full items-center justify-center overflow-hidden rounded-[50%] bg-parchment-deep ring-1 ring-inset ring-gold/35">
             <span class="font-serif text-7xl text-gold/70" aria-hidden="true">{initial}</span>
             <img
               src={`${import.meta.env.BASE_URL}${profile.portrait}`}
