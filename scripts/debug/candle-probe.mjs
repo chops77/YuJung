@@ -26,7 +26,7 @@ const short = r => r.ok ? 'ok'
 const signup = await j(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${env.PUBLIC_FIREBASE_API_KEY}`,
   { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{"returnSecureToken":true}' });
 if (!signup.ok) { console.log('signup FAILED:', short(signup)); process.exit(1); }
-const { idToken, localUid: uid } = signup.body;
+const { idToken, localId: uid } = signup.body;
 console.log(`anon auth: signed in (${idToken ? 'token ok' : 'NO TOKEN'})\n`);
 
 const H = { 'authorization': `Bearer ${idToken}`, 'content-type': 'application/json' };
@@ -46,7 +46,8 @@ const countInc = { transform: { document: counterName,
 const stampWrite = u => ({ update: { name: stampName(u), fields: {} },
   updateTransforms: [{ fieldPath: 'lastLitAt', setToServerValue: 'REQUEST_TIME' }] });
 
-// Probe A — paired writes (exact client flow): counter+1 AND fresh stamp
+// Probe A FIRST — paired writes on a fresh uid (exact client flow):
+// counter+1 AND fresh stamp
 const n = Number(preCount) || 0;
 let a;
 if (preCount === 'missing') {
@@ -59,10 +60,6 @@ if (preCount === 'missing') {
 }
 console.log(`A paired counter+stamp : ${short(a)}`);
 
-// Probe B — stamp alone under a throwaway uid (isolates lit rules)
-const b = await commit([stampWrite(uid + '-probeB')]);
-console.log(`B stamp alone          : ${short(b)}`);
-
 // Probe C — counter bump WITHOUT pairing (must be denied by design)
 const c = await commit([countInc]);
 console.log(`C unpaired bump        : ${short(c)}  ${c.ok ? '← SECURITY HOLE' : '(expected denial)'}`);
@@ -72,6 +69,10 @@ if (preCount !== 'missing') {
   const d = await commit([countInc, stampWrite(uid)]);
   console.log(`D immediate re-pair    : ${d.ok ? 'ok — THROTTLE NOT ENFORCED!' : `(cooldown) ${short(d)}`}`);
 }
+
+// Probe B — own-uid stamp alone AFTER A: hits the lit-update cooldown branch
+const b = await commit([stampWrite(uid)]);
+console.log(`B restamp w/o counter  : ${b.ok ? 'ok' : `(cooldown) ${short(b)}`}`);
 
 const post = await j(docPath('candles/counter'));
 console.log(`\npost: count=${post.body?.fields?.count?.integerValue ?? '?'} (was ${preCount})`);
