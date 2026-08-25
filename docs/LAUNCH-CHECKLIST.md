@@ -27,23 +27,25 @@
 
 ## D. Wiring
 15. Set repo Variables (`PUBLIC_FIREBASE_*`, `PUBLIC_RECAPTCHA_SITE_KEY`, `PUBLIC_CLOUDINARY_CLOUD_NAME`, `PUBLIC_CLOUDINARY_UPLOAD_PRESET`) → re-run deploy
-16. GitHub OAuth App (callback `<site>/<repo>/admin/`) → app_id into admin/config.yml
-17. Local: `cp .env.example .env` and fill
+16. Deploy [sveltia-cms-auth](https://github.com/sveltia/sveltia-cms-auth) as a Cloudflare Worker
+17. Create a GitHub OAuth App with callback `<worker-url>/callback`; set the Worker's `GITHUB_CLIENT_ID`, encrypted `GITHUB_CLIENT_SECRET`, and `ALLOWED_DOMAINS`
+18. Set `backend.repo` and the Worker URL as `backend.base_url` in `public/admin/config.yml`
+19. Local: `cp .env.example .env` and fill
 
 ## E. Content
-18. Visit /admin/ → sign in with a collaborator account
-19. Fill Profile, Biography, Timeline, Photos, Videos, Service, Donations
-20. Add og.jpg (1200×630), portrait.jpg, favicon is included
-21. Test all three languages + mobile widths
+20. Visit /admin/ → sign in with a collaborator account
+21. Fill Profile, Biography, Timeline, Photos, Videos, Service, Donations, and optional Music
+22. Add og.jpg (1200×630), portrait.jpg, favicon is included
+23. Test all three languages + mobile widths
 
 ## F. Memory Wall rehearsal
-22. Post test Memories with JPEG, HEIC, and YouTube attachments; verify wall, comments, and candle
-23. Interrupt a Firestore write after photo upload; verify Submit reuses the completed upload
-24. Hide / unhide / edit / delete from `/admin/moderation`
-25. Copy a Guest Photo public ID and locate it in Cloudinary's Media Library
-26. Verify rules block non-admin updates and deletes (try in incognito)
+24. Post test Memories with JPEG, HEIC, and YouTube attachments; verify wall, comments, and candle
+25. Interrupt a Firestore write after photo upload; verify Submit reuses the completed upload
+26. Hide / unhide / edit / delete from `/admin/moderation`
+27. Copy a Guest Photo public ID and locate it in Cloudinary's Media Library
+28. Verify rules block non-admin updates and deletes (try in incognito)
 
 ## G. Go live
-27. Enable Cloudinary usage notifications and monitor the free-tier allowance
-28. Share URL + QR code on printed materials
-29. After services: toggle `service` off in CMS Site Settings
+29. Enable Cloudinary usage notifications and monitor the free-tier allowance
+30. Share URL + QR code on printed materials
+31. After services: toggle `service` off in CMS Site Settings

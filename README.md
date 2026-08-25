@@ -21,8 +21,10 @@ every piece of content translatable per language.
 - 🔐 **Post-hoc moderation** — family members sign in with email/password to hide,
   edit, or delete any card or comment; soft-hide by default, hard delete guarded
 - 🧩 **Toggleable sections** — nav and routes respond instantly to Site Settings
-- ✍️ **Git-based CMS** (Decap) — edit everything through browser forms; saves commit
-  straight to the repo and trigger an automatic rebuild
+- 🎞 **Homepage slideshow** — gallery photos rotate at an admin-configured interval, with
+  pause, fullscreen, and an optional CMS-managed music playlist
+- ✍️ **Git-based CMS** (Decap) — edit everything through browser forms; saves commits
+  straight to the repo and triggers an automatic rebuild
 - 🌏 **Trilingual** — route-based i18n with localized dates, relative times, and content fields
 - ⚡ **Fast & free to host** — static Astro output on GitHub Pages, Firestore for guest
   content, and Cloudinary's free tier for uploaded photos
@@ -30,12 +32,13 @@ every piece of content translatable per language.
 ## Stack
 
 Astro 5 · Tailwind CSS 4 · Decap CMS · Firebase (Firestore, Auth, App Check) · Cloudinary ·
-GitHub Actions → GitHub Pages
+Cloudflare Workers (CMS OAuth) · GitHub Actions → GitHub Pages
 
 ## Requirements
 
-- Node.js **18.17+** (Node 20 LTS recommended)
+- Node.js **20.3+** (Node 20 LTS recommended; Astro also supports Node 22+)
 - A GitHub account (Pages + OAuth app)
+- A Cloudflare account (free Worker for CMS authentication)
 - A Firebase project (free Spark plan is sufficient)
 - A Cloudinary account (the free plan is sufficient for small memorial sites)
 
@@ -85,6 +88,7 @@ All curated content lives in `src/content/**/*.yaml` and is editable via the CMS
 | `videos` | YouTube video IDs (upload as *Unlisted*) + titles |
 | `service` | Funeral/memorial date, venue, maps & livestream links |
 | `donations` | Charity cards (name, URL, blurb) |
+| `music` | Optional homepage slideshow tracks, artists, active state, and play order |
 
 Per-language fields use the keys `en` / `zh_tw` / `zh_cn`. Route codes are
 `en` / `zh-tw` / `zh-cn`; the helper `pick()` in `src/i18n/ui.ts` bridges the two.
@@ -92,6 +96,10 @@ Per-language fields use the keys `en` / `zh_tw` / `zh_cn`. Route codes are
 **Media convention:** paths in content have **no leading slash** (e.g. `media/portrait.jpg`).
 Components prefix `import.meta.env.BASE_URL`, which keeps images working on project sites
 served under `/<repo>/`.
+
+Music files are also curated static media: the CMS commits them under
+`public/media/uploads/` and the site rebuilds. Keep each track to roughly 8 MB; see
+[`docs/adr/0001-music-files-in-git-via-decap.md`](docs/adr/0001-music-files-in-git-via-decap.md).
 
 ## Moderation & permissions
 
@@ -112,18 +120,22 @@ Full walkthrough: [`docs/LAUNCH-CHECKLIST.md`](docs/LAUNCH-CHECKLIST.md). Short 
 3. Create the Cloudinary unsigned upload preset described in the launch checklist
 4. Set repo Variables: `PUBLIC_FIREBASE_*`, `PUBLIC_RECAPTCHA_SITE_KEY`,
    `PUBLIC_CLOUDINARY_CLOUD_NAME`, and `PUBLIC_CLOUDINARY_UPLOAD_PRESET`
-5. Create a GitHub **OAuth App** (callback `https://<user>.github.io/yujung/admin/`)
-   and put its Client ID in `public/admin/config.yml`
-6. Fill content via `/admin/` — every save rebuilds the site automatically
+5. Deploy [`sveltia-cms-auth`](https://github.com/sveltia/sveltia-cms-auth) as a Cloudflare
+   Worker; create a GitHub **OAuth App** whose callback is `<worker-url>/callback`; configure
+   the Worker's `GITHUB_CLIENT_ID`, encrypted `GITHUB_CLIENT_SECRET`, and `ALLOWED_DOMAINS`
+6. Set `backend.repo` and the Worker URL as `backend.base_url` in `public/admin/config.yml`
+7. Fill content via `/admin/` — every save rebuilds the site automatically
 
 ## Using YuJung for another loved one
 
 1. Fork / "Use this template"
-2. `npm run seed` — resets content to blank scaffolding
-3. Update the four places the name appears:
+2. `npm run seed` — **destructively** resets settings, profile, and service and wipes all
+   repeatable collections (timeline, photos, videos, donations, and music)
+3. Update the deployment and CMS settings:
    - `astro.config.mjs` → `site` and `base: '/<new-repo>'`
-   - `public/admin/config.yml` → `site_url`, `display_url`, `backend.repo`
-   - Your OAuth App callback URL → `https://<user>.github.io/<new-repo>/admin/`
+   - `public/admin/config.yml` → `site_url`, `display_url`, `backend.repo`, and
+     `backend.base_url`
+   - Your OAuth Worker → `ALLOWED_DOMAINS`; use `<worker-url>/callback` for the OAuth App
 4. Set a fresh (or shared) Firebase config through environment variables and add admins
 5. Edit everything through `/admin/`
 
@@ -146,7 +158,7 @@ No Firebase or Cloudinary secret ships to the client.
 ├── scripts/seed.mjs            # reset content for reuse
 ├── public/
 │   ├── favicon.svg
-│   ├── media/                  # photos (uploads land in media/uploads/)
+│   ├── media/                  # curated photos/audio (CMS uploads land in media/uploads/)
 │   └── admin/
 │       ├── index.html          # Decap CMS entry
 │       └── config.yml          # CMS collections
@@ -155,7 +167,7 @@ No Firebase or Cloudinary secret ships to the client.
     ├── content.config.ts       # zod schemas
     ├── i18n/                   # ui.ts runtime + en / zh-tw / zh-cn JSON
     ├── layouts/Base.astro      # nav-from-toggles, SEO/hreflang/OG
-    ├── components/             # Hero, switcher, MemoryWall islands
+    ├── components/             # Hero, switcher, slideshow, MemoryWall islands
     ├── lib/firebase.ts         # init + guest/admin data helpers
     ├── pages/                  # root redirect, [locale]/*, moderation, 404
     └── content/                # settings, profile, timeline, …

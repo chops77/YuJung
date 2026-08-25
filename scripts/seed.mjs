@@ -8,7 +8,7 @@ import { rmSync, mkdirSync, writeFileSync } from 'node:fs';
 const C = 'src/content';
 
 // Wipe repeatable collections, keep directories
-for (const f of ['timeline', 'photos', 'videos', 'donations']) {
+for (const f of ['timeline', 'photos', 'videos', 'donations', 'music']) {
   rmSync(`${C}/${f}`, { recursive: true, force: true });
   mkdirSync(`${C}/${f}`, { recursive: true });
   writeFileSync(`${C}/${f}/.gitkeep`, '');
@@ -26,11 +26,14 @@ sections:
   memories: true
   service: true      # switch off once services conclude
   donations: false
+  slideshow: true
 contactEmail: ""
 footerNote:
   en: ""
   zh_tw: ""
   zh_cn: ""
+slideshow:
+  intervalSeconds: 5
 `);
 
 writeFileSync(`${C}/profile/profile.yaml`, `# Fill via CMS → Memorial Profile
@@ -71,5 +74,5 @@ console.log(`
   1. Replace every REPLACE marker (or just use /admin/ in the browser)
   2. Drop portrait into public/media/
   3. astro.config.mjs → set site + base
-  4. public/admin/config.yml → set repo + OAuth app_id
+  4. public/admin/config.yml → set site URLs, repo + OAuth Worker base_url
 `);
