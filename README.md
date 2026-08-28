@@ -42,6 +42,8 @@ Cloudflare Workers (CMS OAuth) · GitHub Actions → GitHub Pages
 - A Firebase project (free Spark plan is sufficient)
 - A Cloudinary account (the free plan is sufficient for small memorial sites)
 
+Python 3.9+ is only required to regenerate the printable memorial poster.
+
 ## Local development
 
 ```bash
@@ -64,6 +66,27 @@ server, then:
 npm run build     # catches YAML/schema/import errors
 npm run preview   # serves dist/ exactly as GitHub Pages will
 ```
+
+### Printable memorial poster
+
+The repository includes a bilingual A4 poster at
+[`public/downloads/yu-jung-memorial-poster.pdf`](public/downloads/yu-jung-memorial-poster.pdf).
+It has separate QR codes for the Traditional Chinese and English sites and invites visitors
+to leave a message or memory on the Memory Wall. Because it lives under `public/`, the
+deployed PDF is available at `/YuJung/downloads/yu-jung-memorial-poster.pdf`.
+
+To regenerate it after changing the portrait, wording, or site URLs:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -r scripts/requirements-poster.txt
+python3 scripts/create-memorial-poster.py
+```
+
+The generator reads `public/media/uploads/grandma.jpg` and overwrites the PDF above. Print
+the result on A4 paper using **Actual Size** or **100% scale** so the QR codes and margins
+retain their intended dimensions.
 
 ### Editing content through the CMS (local)
 
@@ -156,8 +179,11 @@ No Firebase or Cloudinary secret ships to the client.
 ├── firestore.rules             # guest + admin access model
 ├── docs/LAUNCH-CHECKLIST.md    # step-by-step launch walkthrough
 ├── scripts/seed.mjs            # reset content for reuse
+├── scripts/create-memorial-poster.py
+├── scripts/requirements-poster.txt
 ├── public/
 │   ├── favicon.svg
+│   ├── downloads/              # print-ready memorial poster
 │   ├── media/                  # curated photos/audio (CMS uploads land in media/uploads/)
 │   └── admin/
 │       ├── index.html          # Decap CMS entry
