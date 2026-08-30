@@ -84,9 +84,12 @@ python3 -m pip install -r scripts/requirements-poster.txt
 python3 scripts/create-memorial-poster.py
 ```
 
-The generator reads `public/media/uploads/grandma.jpg` and overwrites the PDF above. Print
-the result on A4 paper using **Actual Size** or **100% scale** so the QR codes and margins
-retain their intended dimensions.
+By default, the generator reads `public/media/uploads/grandma.jpg` and overwrites the PDF
+above. To use a different picture, edit the `PORTRAIT` path near the top of
+`scripts/create-memorial-poster.py`. You can also change the generated PDF's location or
+file name by editing `OUTPUT` in the same script. Print the result on A4 paper using
+**Actual Size** or **100% scale** so the QR codes and margins retain their intended
+dimensions.
 
 ### Editing content through the CMS (local)
 

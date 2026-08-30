@@ -152,7 +152,7 @@ def build_poster() -> None:
 
     centered_text(pdf, "曹玉蓉", height - 289, "STSong-Light", 29)
     centered_text(pdf, "YuJung Chao", height - 311, "Times-Roman", 17, GOLD_DEEP)
-    centered_text(pdf, "1926  ·  2026", height - 333, "Helvetica", 9, HexColor("#69635C"))
+    centered_text(pdf, "1928  ·  2026", height - 333, "Helvetica", 9, HexColor("#69635C"))
     centered_text(pdf, "一生溫柔，滿載恩慈。", height - 359, "STSong-Light", 12, INK)
     centered_text(pdf, "A life measured in kindness.", height - 377, "Times-Italic", 10.5, HexColor("#69635C"))
 
